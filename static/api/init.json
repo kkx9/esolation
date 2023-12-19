@@ -1,0 +1,31 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "/static/page/welcome.html"
+  },
+  "logoInfo": {
+    "title": "VK-GPU",
+    "image": "/static/images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+        "title": "主页",
+        "href": "/static/page/welcome.html",
+        "icon": "fa fa-home",
+        "target": "_self"
+    },
+    {
+      "title": "CVE演示",
+      "href": "/static/page/container.html",
+      "icon": "fa fa-exclamation-triangle",
+      "target": "_self"
+    },
+    {
+      "title": "性能演示",
+      "href": "https://leetcode.cn/problemset/algorithms/",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    }
+  ]
+}
