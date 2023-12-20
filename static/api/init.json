@@ -23,8 +23,20 @@
     },
     {
       "title": "性能演示",
-      "href": "https://leetcode.cn/problemset/algorithms/",
+      "href": "http://192.168.187.141:8888/",
       "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
+      "title": "GPU",
+      "href": "/static/page/gpu.html",
+      "icon": "fa fa-pie-chart",
+      "target": "_self"
+    },
+    {
+      "title": "TEST",
+      "href": "/static/page/test.html",
+      "icon": "fa fa-pie-chart",
       "target": "_self"
     }
   ]
