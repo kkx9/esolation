@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>日志演示</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 工具栏模板 -->
+        <script type="text/html" id="toolbar">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-sm" lay-event="add">创建容器</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete_many">删除</button>
+            </div>
+        </script>
+
+        <!-- 表头某列 templet 属性指向的模板 -->
+        <script type="text/html" id="tools">
+            <a class="layui-btn layui-bg-blue layui-btn-xs" lay-event="exec">打印日志</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+        </script>
+        <table class="layui-hide" id="container"></table>
+
+        <fieldset class="layui-fieldset">
+            <legend>日志信息</legend>
+                <!-- 在表单下面添加输出台 -->
+                <div class="layui-row">
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">日志1：</label>
+                            <div class="layui-input-block">
+                                <textarea id="commandResult1" class="layui-textarea" style="height: 500px;" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md6">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">日志2：</label>
+                            <div class="layui-input-block">
+                                <textarea id="commandResult2" class="layui-textarea" style="height: 500px;" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </fieldset>
+
+    </div>
+</div>
+
+<script src="/static/layui.js"></script>
+<script>
+    layui.use(function () {
+        var table = layui.table;
+
+        function render_enable(d) {
+            if (d.enable) {
+                return '<span style="color: green">True</span>';
+            } else {
+                return '<span style="color: grey">False</span>';
+            }
+        }
+        // 已知数据渲染
+        var inst = table.render({
+            elem: '#container',
+            id: 'container',
+            url: '/api/container',
+            toolbar: '#toolbar',
+            cols: [
+                [   // 标题栏
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 70, sort: true},
+                    {field: 'container_id', title: 'CONTAINER_ID', width: 600, sort: true},
+                    {field: 'port', title: 'PORT', width: 100},
+                    {field: 'enable', title: '启用', width: 100, templet: render_enable},
+                    {field: 'create_at', title: '创建时间', width: 200},
+                    {title: '操作', minWidth: 180, templet: '#tools', align: "center"},
+<!--                    {field: 'results', title: '日志', minWidth: 170, align: "center"}-->
+                ]],
+            limits: [10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line'
+        });
+        // 头部工具栏事件
+        table.on('toolbar(container)', function (obj) {
+            var options = obj.config; // 获取当前表格属性配置项
+            var checkStatus = table.checkStatus(options.id); // 获取选中行相关数据
+
+            // 根据不同的事件名进行相应的操作
+            switch (obj.event) { // 对应模板元素中的 lay-event 属性值
+                case 'add':
+                    window.show_add()
+                    break;
+                case 'delete_many':
+                    window.delete_many(obj)
+                    break;
+            }
+        });
+
+        window.show_add = function () {
+            layer.open({
+                type: 2,
+                title: '新增容器',
+                shadeClose: true,
+                maxmin: true, //开启最大化最小化按钮
+                area: ['300px', '250px'],
+                content: '../page/container_add.html'
+            });
+        }
+
+        //监听表格复选框选择
+        table.on('checkbox(container)', function (obj) {
+            console.log(obj)
+        });
+
+        // 新增提交的方法
+        const del_container_api = async (id) => {
+            const options = {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/del/${id}`, options)
+            return await response.json()
+        }
+
+        window.delete_many = function (obj) {
+            var checkStatus = table.checkStatus('container')
+                , data = checkStatus.data;
+            for (i = 0; i < data.length; i++) {
+                del_container_api(data[i].id).then(function (ret) {
+                    // 提交成功之后的回调
+                    if (!ret.code) {
+                        layer.msg(ret.msg, {
+                            icon: 1,
+                            time: 1000,
+                        }, function () {
+                            table.reload('container');
+                        });
+                    } else {
+                        layer.msg(ret.msg, {
+                            icon: 2,
+                            time: 1000,
+                        });
+                    }
+                })
+            }
+        }
+
+        var $ = layui.jquery;
+        // 单元格工具事件
+        table.on('tool(container)', function (obj) {
+            var layEvent = obj.event; // 获得元素对应的 lay-event 属性值
+            if (layEvent === 'exec') { //执行
+                window.exec(obj)
+            } else if (layEvent === 'del') { //删除
+                layer.confirm('确定删除吗？', function (index) {
+                    layer.close(index);
+                    window.del_container(obj)
+                });
+            }
+        });
+
+        // 新增提交的方法
+        const exec_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/exec/${id}`, options)
+            return await response.json()
+        }
+
+        window.exec = (obj) => {
+            // console.log(obj)
+            exec_api(obj.data.id).then(function (ret) {
+                // 提交成功之后的回调
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    }, function () {
+                        if (obj.enable) {
+                            $('#commandResult2').val(ret.output);
+                        } else {
+                            $('#commandResult1').val(ret.output);
+                        }
+<!--                        table.reload('container');-->
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
+
+        window.del_container = (obj) => {
+            // console.log(obj)
+            del_container_api(obj.data.id).then(function (ret) {
+                // 提交成功之后的回调
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    }, function () {
+                        table.reload('container');
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
+
+    });
+</script>
+</body>
+</html>

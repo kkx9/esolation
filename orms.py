@@ -8,10 +8,10 @@ class ContainerORM(db.Model):
     enable = db.Column(db.Boolean, default=False)
     create_at = db.Column(db.DateTime, default=datetime.now)  # 记录的创建时间
     port = db.Column(db.Integer, unique=True)
-    status = db.Column(db.Boolean, default=None)
-    results = db.Column(db.String(255))
+    # status = db.Column(db.Boolean, default=None)
+    # results = db.Column(db.String(255))
     client = None
-    channel = None
+    # channel = None
 
     def save(self):
         db.session.add(self)

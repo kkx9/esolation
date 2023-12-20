@@ -16,14 +16,14 @@
         "target": "_self"
     },
     {
-      "title": "CVE演示",
-      "href": "/static/page/container.html",
-      "icon": "fa fa-exclamation-triangle",
+      "title": "日志演示",
+      "href": "/static/page/log.html",
+      "icon": "fa fa-file-text",
       "target": "_self"
     },
     {
       "title": "性能演示",
-      "href": "http://192.168.187.141:8888/",
+      "href": "http://localhost:8888/",
       "icon": "fa fa-bar-chart",
       "target": "_self"
     },
