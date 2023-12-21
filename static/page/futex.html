@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>GPU</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .top-panel > .layui-card-body{
+            height: 60px;
+        }
+        .top-panel-number{
+            line-height:60px;
+            font-size: 30px;
+            border-right:1px solid #eceff9;
+        }
+        .top-panel-tips{
+            line-height:30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+<div class="layuimini-main">
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="futexHashChart" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md6">
+            <div id="futexWakeChart" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-xs12 layui-col-md9">
+            <div id="echarts-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+        <div class="layui-col-xs12 layui-col-md3">
+            <div id="echarts-pies" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
+        </div>
+    </div>
+
+
+</div>
+</div>
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+
+        /**
+         * 柱状图
+         */
+        var futexHashChart = echarts.init(document.getElementById('futexHashChart'), 'walden');
+
+        var optionHash = {
+            title: {
+                text: '容器 futex 系统调用性能测试 —— futex hash',
+                left: 'center'
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 30    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: 'operations/sec',
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '50%',
+                    data: [0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+
+        futexHashChart.setOption(optionHash);
+
+
+        var futexWakeChart = echarts.init(document.getElementById('futexWakeChart'), 'walden');
+
+        var optionWake = {
+            title: {
+                text: '容器 futex 系统调用性能测试 —— futex wake-parallel',
+                left: 'center'
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 30    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: "平均每个线程被唤醒的时间（μs）",
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '50%',
+                    data: [0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+
+        futexWakeChart.setOption(optionWake);
+
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
+</body>
+</html>

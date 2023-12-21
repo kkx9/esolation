@@ -22,6 +22,12 @@
       "target": "_self"
     },
     {
+      "title": "futex演示",
+      "href": "/static/page/futex.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
       "title": "性能演示",
       "href": "http://192.168.187.141:8888/",
       "icon": "fa fa-bar-chart",
