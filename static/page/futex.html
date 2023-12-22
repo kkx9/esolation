@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FUTEX</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .top-panel > .layui-card-body{
+            height: 60px;
+        }
+        .top-panel-number{
+            line-height:60px;
+            font-size: 30px;
+            border-right:1px solid #eceff9;
+        }
+        .top-panel-tips{
+            line-height:30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+<div class="layuimini-main">
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="futexHashChart" style="min-height:500px;padding: 30px"></div>
+
+        <div style="overflow: auto; max-height: 400px; margin-left: 5px; margin-right: 10px;">
+            <table id="futexHash" class="layui-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>futex hash</th>
+                        <th>docker-secure(baseline)</th>
+                        <th>docker-insecure</th>
+                        <th>gvisor-ptrace</th>
+                        <th>gvisor-kvm</th>
+                        <th>kata</th>
+                        <th>vkernel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>operations/sec</td>
+                        <td>-</td>
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="color-box">
+                <code style="color: red;">worse</code>
+            </div>
+            <div><code style="color: green;">better</code></div>
+        </div>
+        <div style="padding: 30px">
+            <button class="layui-btn" id="hash">hash演示</button>
+        </div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="futexWakeChart" style="min-height:500px;padding: 30px"></div>
+
+        <div style="overflow: auto; max-height: 400px; margin-right: 5px;">
+            <table id="futexWake" class="layui-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>futex wake-parallel</th>
+                        <th>docker-secure(baseline)</th>
+                        <th>docker-insecure</th>
+                        <th>gvisor-ptrace</th>
+                        <th>gvisor-kvm</th>
+                        <th>kata</th>
+                        <th>vkernel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>μs</td>
+                        <td>-</td>
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td> <!-- 这里是空的，初始时没有任何数据 -->
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div><code style="color: red;">worse</code></div>
+            <div><code style="color: green;">better</code></div>
+        </div>
+        <div style="padding: 30px">
+            <button class="layui-btn" id="wake">wake演示</button>
+        </div>
+    </div>
+</div>
+</div>
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+
+        /**
+         * 柱状图
+         */
+        var futexHashChart = echarts.init(document.getElementById('futexHashChart'), 'walden');
+        var hashTable = document.getElementById('futexHash');
+
+        var optionHash = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: '容器 futex 系统调用性能测试 —— futex hash',
+                left: 'center'
+            },
+            legend: {
+                orient: 'horizontal', // 设置图例水平显示
+                x: 'center', // 设置图例水平居中
+                y: 'bottom', // 设置图例在底部显示
+                data:['futex wait 操作，计算 futex 锁的 hash']
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: 'operations/sec',
+                nameLocation: 'middle',
+                nameGap: 50,
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    name: 'futex wait 操作，计算 futex 锁的 hash',
+                    type: 'bar',
+                    barWidth: '50%',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图的顶部
+                    },
+                    data: [0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+
+        // 读取JSON文件
+        function loadHashJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/hash.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawFutexHashChart(data) {
+            var jsonData = JSON.parse(data);
+            var tbody = hashTable.getElementsByTagName('tbody')[0];
+            for (var i = 0; i < jsonData.data.length; i++) {
+              optionHash.series[0].data[i] = jsonData.data[i];
+              if (i >= 1 && jsonData.data[0] != 0 && jsonData.data[i] != 0) {
+                var cellValue = jsonData.data[i] / jsonData.data[0] - 1;
+                if (cellValue > 0) {
+                    tbody.rows[0].cells[i+1].style.color = 'green';
+                } else if (cellValue < 0) {
+                    tbody.rows[0].cells[i+1].style.color = 'red';
+                }
+                tbody.rows[0].cells[i+1].innerHTML = (cellValue * 100).toFixed(2) + '%';
+              }
+            }
+            futexHashChart.setOption(optionHash);
+        }
+
+        // 定时更新统计图
+        function updateHashChart() {
+            loadHashJSON(function(response) {
+              drawFutexHashChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateHashChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateHashChart, 1000);
+
+        var futexWakeChart = echarts.init(document.getElementById('futexWakeChart'), 'walden');
+        var wakeTable = document.getElementById('futexWake');
+
+        var optionWake = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: '容器 futex 系统调用性能测试 —— futex wake-parallel',
+                left: 'center'
+            },
+            legend: {
+                orient: 'horizontal', // 设置图例水平显示
+                x: 'center', // 设置图例水平居中
+                y: 'bottom', // 设置图例在底部显示
+                data:['并发futex wake操作']
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: "平均每个线程被唤醒的时间（μs）",
+                nameLocation: 'middle',
+                nameGap: 50,
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    name: '并发futex wake操作',
+                    type: 'bar',
+                    barWidth: '50%',
+                    color: 'orange',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图的顶部
+                    },
+                    data: [0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+
+        // 读取JSON文件
+        function loadWakeJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/wake.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawFutexWakeChart(data) {
+            var jsonData = JSON.parse(data);
+            var tbody = wakeTable.getElementsByTagName('tbody')[0];
+            for (var i = 0; i < jsonData.data.length; i++) {
+              optionWake.series[0].data[i] = jsonData.data[i];
+              if (i >= 1 && jsonData.data[0] != 0 && jsonData.data[i] != 0) {
+                var cellValue = jsonData.data[i] / jsonData.data[0] - 1;
+                if (cellValue > 0) {
+                    tbody.rows[0].cells[i+1].style.color = 'green';
+                } else if (cellValue < 0) {
+                    tbody.rows[0].cells[i+1].style.color = 'red';
+                }
+                tbody.rows[0].cells[i+1].innerHTML = (cellValue * 100).toFixed(2) + '%';
+              }
+            }
+            futexWakeChart.setOption(optionWake);
+        }
+
+        // 定时更新统计图
+        function updateWakeChart() {
+            loadWakeJSON(function(response) {
+              drawFutexWakeChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateWakeChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateWakeChart, 1000);
+
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
+</body>
+</html>

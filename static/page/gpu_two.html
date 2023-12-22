@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FUTEX</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .top-panel > .layui-card-body{
+            height: 60px;
+        }
+        .top-panel-number{
+            line-height:60px;
+            font-size: 30px;
+            border-right:1px solid #eceff9;
+        }
+        .top-panel-tips{
+            line-height:30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+<div class="layuimini-main">
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="apiChart" style="min-height:500px;padding: 30px"></div>
+
+        <div style="padding: 30px">
+            <button class="layui-btn" id="API">API转发</button>
+        </div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="tvmChart" style="min-height:500px;padding: 30px"></div>
+
+        <div style="padding: 30px">
+            <button class="layui-btn" id="TVM">TVM开销</button>
+        </div>
+    </div>
+</div>
+</div>
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+
+        /**
+         * 柱状图
+         */
+        var apiChart = echarts.init(document.getElementById('apiChart'), 'walden');
+
+        var optionAPI = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: 'API转发开销测试',
+                left: 'center'
+            },
+<!--            legend: {-->
+<!--                orient: 'horizontal', // 设置图例水平显示-->
+<!--                x: 'center', // 设置图例水平居中-->
+<!--                y: 'bottom', // 设置图例在底部显示-->
+<!--                data:['futex wait 操作，计算 futex 锁的 hash']-->
+<!--            },-->
+            tooltip: {},
+            xAxis: {
+                data: ["1", "2", "4", "8", "16", "32", "48"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: 'API forward latency (μs)',
+                nameLocation: 'middle',
+                nameGap: 50,
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '50%',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图的顶部
+                    },
+                    data: [0, 0, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+
+        // 读取JSON文件
+        function loadAPIJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/gpu/api.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawAPIChart(data) {
+            var jsonData = JSON.parse(data);
+            for (var i = 0; i < jsonData.data.length; i++) {
+              optionAPI.series[0].data[i] = jsonData.data[i];
+            }
+            apiChart.setOption(optionAPI);
+        }
+
+        // 定时更新统计图
+        function updateAPIChart() {
+            loadAPIJSON(function(response) {
+              drawAPIChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateAPIChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateAPIChart, 1000);
+
+        var tvmChart = echarts.init(document.getElementById('tvmChart'), 'walden');
+
+        var optionTVM = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: 'TVM以及离线转换开销',
+                left: 'center'
+            },
+            legend: {
+                orient: 'horizontal', // 设置图例水平显示
+                x: 'center', // 设置图例水平居中
+                y: 'bottom', // 设置图例在底部显示
+                data:['TVM (Transformation)', 'Offline profiling']
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["Densenet", "Vgg", "Resnet", "LSTM"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: "平均每个线程被唤醒的时间（μs）",
+                nameLocation: 'middle',
+                nameGap: 50,
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    name: 'TVM (Transformation)',
+                    type: 'bar',
+                    barWidth: '30%',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图
+                    },
+                    data: [0, 0, 0, 0]
+                },
+                {
+                    name: 'Offline profiling',
+                    type: 'bar',
+                    barWidth: '30%',
+                    color: 'orange',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图
+                    },
+                    data: [0, 0, 0, 0],
+                    barGap: 0
+                }
+            ]
+        };
+
+        // 读取JSON文件
+        function loadTVMJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/gpu/tvm.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawTVMChart(data) {
+            var jsonData = JSON.parse(data);
+            for (var i = 0; i < jsonData.data1.length; i++) {
+              optionTVM.series[0].data[i] = jsonData.data1[i];
+              optionTVM.series[1].data[i] = jsonData.data2[i];
+            }
+            tvmChart.setOption(optionTVM);
+        }
+
+        // 定时更新统计图
+        function updateTVMChart() {
+            loadTVMJSON(function(response) {
+              drawTVMChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateTVMChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateTVMChart, 1000);
+
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
+</body>
+</html>

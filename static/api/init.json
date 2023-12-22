@@ -16,6 +16,12 @@
         "target": "_self"
     },
     {
+      "title": "futex演示",
+      "href": "/static/page/futex.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
       "title": "日志演示",
       "href": "/static/page/log.html",
       "icon": "fa fa-file-text",
@@ -23,21 +29,41 @@
     },
     {
       "title": "性能演示",
-      "href": "http://localhost:8888/",
+      "href": "/static/page/performance.html",
       "icon": "fa fa-bar-chart",
       "target": "_self"
     },
     {
-      "title": "GPU",
-      "href": "/static/page/gpu.html",
+      "title": "GPU演示",
       "icon": "fa fa-pie-chart",
-      "target": "_self"
-    },
-    {
-      "title": "TEST",
-      "href": "/static/page/test.html",
-      "icon": "fa fa-pie-chart",
-      "target": "_self"
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "Memory Pool",
+          "href": "/static/page/memorypool.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        },
+        {
+          "title": "Latency",
+          "href": "/static/page/latency.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        },
+        {
+          "title": "Throughput",
+          "href": "/static/page/throughput.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        },
+        {
+          "title": "实验二",
+          "href": "/static/page/gpu_two.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        }
+      ]
     }
   ]
 }
