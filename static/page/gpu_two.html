@@ -27,6 +27,7 @@
 <body>
 <div class="layuimini-container">
 <div class="layuimini-main">
+    <h1 style="text-align: center;">开销测试</h1>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="apiChart" style="min-height:500px;padding: 30px"></div>
 
@@ -51,6 +52,36 @@
         var $ = layui.jquery,
             layer = layui.layer,
             echarts = layui.echarts;
+
+        $('button').on('click', function(){
+            exec_button_api(this.id);
+        });
+
+        // 新增提交的方法
+        const exec_button_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/button/${id}`, options)
+            return await response.json()
+        }
+
+        window.exec_button = function(id) {
+            exec_button_api(id).then(function (ret) {
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
 
         /**
          * 柱状图
@@ -95,7 +126,12 @@
             yAxis: {
                 name: 'API forward latency (μs)',
                 nameLocation: 'middle',
-                nameGap: 50,
+                nameGap: 30,
+                nameTextStyle: {
+                    color: 'black',
+                    fontFamily: '黑体',
+                    fontSize: 16
+                },
                 axisLine: {       // 不显示y轴线条
                     show: false
                 }
@@ -185,9 +221,14 @@
                 }
             },
             yAxis: {
-                name: "平均每个线程被唤醒的时间（μs）",
+                name: "Offline  overhead（s）",
                 nameLocation: 'middle',
-                nameGap: 50,
+                nameGap: 30,
+                nameTextStyle: {
+                    color: 'black',
+                    fontFamily: '黑体',
+                    fontSize: 16
+                },
                 axisLine: {       // 不显示y轴线条
                     show: false
                 }

@@ -1,9 +1,7 @@
-import subprocess
-# import time
-
-import paramiko
-from flask import Flask, request, render_template
 import config
+import paramiko
+import subprocess
+from flask import Flask, request, render_template
 from extensions import register_extension, db
 from orms import ContainerORM
 
@@ -19,11 +17,6 @@ def index():
 def create():
     db.drop_all()
     db.create_all()
-
-
-@app.get('/container_add')
-def student_add():
-    return render_template('container_add.html')
 
 
 test_image = "cve-image"
@@ -45,28 +38,6 @@ def create_container(enable, port):
         return ""
 
 
-# def connect_container(container):
-#     client = paramiko.SSHClient()
-#     client.load_system_host_keys()
-#     client.set_missing_host_key_policy(paramiko.WarningPolicy())
-#
-#     remote_host = '127.0.0.1'
-#     username = 'testuser'
-#     password = 'testuser'
-#
-#     client.connect(hostname=remote_host, username=username, password=password, port=container.port)
-#
-#     # 使用paramiko.Channel和paramiko.invoke_shell实现交互式shell会话
-#     container.channel = client.invoke_shell()
-#     time.sleep(0.1)
-#     output = ""
-#     while not container.channel.recv_ready():
-#         continue
-#     while container.channel.recv_ready():
-#         output += container.channel.recv(65535).decode()
-#     print(output)
-
-
 @app.post('/api/create')
 def api_create_post():
     data = request.get_json()
@@ -81,7 +52,6 @@ def api_create_post():
             'msg': "容器创建失败"
         }
     try:
-        # connect_container(container)
         container.save()
     except Exception as e:
         return {
@@ -92,97 +62,6 @@ def api_create_post():
         'code': 0,
         'msg': '容器创建成功'
     }
-
-
-# @app.post('/api/root/<int:id>')
-# def api_root(id):
-#     container: ContainerORM = db.get_or_404(ContainerORM, id)
-#     output = ""
-#     while container.channel.recv_ready():
-#         container.channel.recv(65535).decode()
-#
-#     container.channel.send("sudo -u#-1 /bin/bash\n")
-#     time.sleep(0.1)
-#     while not container.channel.recv_ready():
-#         continue
-#     while container.channel.recv_ready():
-#         output += container.channel.recv(65535).decode()
-#     print(output)
-#     if 'Operation not permitted' in output:
-#         return {
-#             'code': -1,
-#             'msg': '提权失败'
-#         }
-#     else:
-#         return {
-#             'code': 0,
-#             'msg': '提权成功'
-#         }
-
-
-# def exec_command(container, command):
-#     print(command)
-#     command = f"/cdk.sh \"{command}\""
-#     flag = False
-#     ret = ""
-#     try:
-#         while container.channel.recv_ready():
-#             container.channel.recv(65535).decode()
-#         container.channel.send(f"{command}\n")
-#         time.sleep(0.5)
-#         output = ""
-#         while not container.channel.recv_ready():
-#             continue
-#         while container.channel.recv_ready():
-#             output += container.channel.recv(65535).decode()
-#         print(output)
-#         time.sleep(0.5)
-#         output = ""
-#         while not container.channel.recv_ready():
-#             continue
-#         while container.channel.recv_ready():
-#             output += container.channel.recv(65535).decode()
-#         print(output)
-#         if "exit status 1" in output:
-#             ret = output
-#         else:
-#             flag = True
-#             lines = output.strip().splitlines()
-#             filtered_lines = lines[1:]
-#             result = "\n".join(filtered_lines)
-#             ret = result
-#             print(result)
-#
-#         container.client.close()
-#         container.client = None
-#         container.channel = None
-#         re = f"docker restart {container.container_id}"
-#         process = subprocess.Popen(re, shell=True)
-#         if process.returncode != 0:
-#             return {
-#                 'code': -1,
-#                 'msg': '容器重启失败'
-#             }
-#         time.sleep(0.1)
-#         connect_container(container)
-#     except Exception as e:
-#         return {
-#             'code': -1,
-#             'msg': e
-#         }
-#     container.results = ret
-#     container.status = flag
-#     container.save()
-#     if flag:
-#         return {
-#             'code': 0,
-#             'msg': '逃逸成功'
-#         }
-#     else:
-#         return {
-#             'code': -1,
-#             'msg': '逃逸失败'
-#         }
 
 
 def exec_dmesg(container):
@@ -208,8 +87,6 @@ def exec_dmesg(container):
     container.client.close()
     if output:
         print(f"Output from remote host: {output}")
-        # container.results = output
-        # print(f"Output from res: {container.results}")
         return {
             'code': 0,
             'output': output,
@@ -226,11 +103,37 @@ def exec_dmesg(container):
 
 @app.post('/api/exec/<int:id>')
 def api_exec_post(id):
-    # data = request.json  # 获取前端发送的 JSON 数据
-    # command = data.get('command')  # 获取命令值
-    # 在这里可以根据需要处理命令，执行相应操作
     container: ContainerORM = db.get_or_404(ContainerORM, id)
     return exec_dmesg(container)
+
+
+def exec_scripts(s):
+    path = "scripts/"
+    script = path + s + ".sh"
+    process = subprocess.Popen(['sh', script], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               universal_newlines=True)
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            print(output.strip())
+
+    if process.poll() == 0:
+        return {
+            'code': 0,
+            'msg': '执行成功'
+        }
+    else:
+        return {
+            'code': -1,
+            'msg': '执行失败'
+        }
+
+
+@app.post('/api/button/<string:id>')
+def api_exec_button(id):
+    return exec_scripts(id)
 
 
 @app.delete('/api/del/<int:id>')
@@ -248,7 +151,6 @@ def api_container_del(id):
         }
     try:
         db.session.delete(container)
-        # container.is_del = True
         db.session.commit()
     except Exception as e:
         return {
@@ -278,9 +180,6 @@ def student_view():
                 'port': item.port,
                 'enable': item.enable,
                 'create_at': item.create_at.strftime('%Y-%m-%d %H:%M:%S'),
-                # 'command': None,
-                # 'status': item.status,
-                # 'results': item.results,
             } for item in items
         ]
     }
@@ -291,4 +190,4 @@ register_extension(app)
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

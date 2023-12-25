@@ -28,11 +28,12 @@
 
 <div class="layuimini-container">
 <div class="layuimini-main">
+    <h1 style="text-align: center;">Latency 测试</h1>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="imageChart" style="min-height:500px;padding: 30px"></div>
 
         <div style="padding: 30px">
-            <button class="layui-btn" id="image">IMAGE</button>
+            <button class="layui-btn" id="latency_image">IMAGE</button>
         </div>
     </div>
 
@@ -40,7 +41,7 @@
         <div id="trafficChart" style="min-height:500px;padding: 30px"></div>
 
         <div style="padding: 30px">
-            <button class="layui-btn" id="traffic">TRAFFIC</button>
+            <button class="layui-btn" id="latency_traffic">TRAFFIC</button>
         </div>
     </div>
 </div>
@@ -52,6 +53,36 @@
 layui.use(['jquery', 'echarts'], function(){
       var $ = layui.jquery,
           echarts = layui.echarts;
+
+              $('button').on('click', function(){
+            exec_button_api(this.id);
+        });
+
+        // 新增提交的方法
+        const exec_button_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/button/${id}`, options)
+            return await response.json()
+        }
+
+        window.exec_button = function(id) {
+            exec_button_api(id).then(function (ret) {
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
 
       // 读取JSON文件
       function loadJSON(file, callback) {
@@ -111,7 +142,12 @@ layui.use(['jquery', 'echarts'], function(){
             type: 'value',
             name: 'CDF',
             nameLocation: 'middle',
-            nameGap: 50,
+            nameGap: 30,
+            nameTextStyle: {
+                color: 'black',
+                fontFamily: '黑体',
+                fontSize: 16
+            },
             splitLine: {      // 不显示网格线
                 show: false
             }
@@ -121,17 +157,29 @@ layui.use(['jquery', 'echarts'], function(){
 
         // 添加多条折线的系列数据
         for (var i = 0; i < jsonData.lines.length; i++) {
-          option.xAxis.push({
-            type: 'category',
-            data: jsonData.lines[i].data1,
-            splitLine: {      // 不显示网格线
-                show: false
-            }
-          });
+          if (i === 0) {
+              option.xAxis.push({
+                type: 'category',
+                data: jsonData.lines[i].data1,
+                name: 'Latency(s)',
+                nameLocation: 'middle',
+                nameGap: 30,
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+              });
+          } else {
+              option.xAxis.push({
+                type: 'category',
+                data: jsonData.lines[i].data1,
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+              });
+          }
           option.series.push({
             name: jsonData.lines[i].name,
             type: 'line',
-<!--            xAxisIndex: i,-->
             data: jsonData.lines[i].data2
           });
           option.legend.data.push(jsonData.lines[i].name);
