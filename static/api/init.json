@@ -16,24 +16,7 @@
         "target": "_self"
     },
     {
-<<<<<<< HEAD
       "title": "ESOLATION演示",
-=======
-      "title": "CVE演示",
-      "href": "/static/page/container.html",
-      "icon": "fa fa-exclamation-triangle",
-      "target": "_self"
-    },
-    {
-      "title": "futex演示",
-      "href": "/static/page/futex.html",
-      "icon": "fa fa-bar-chart",
-      "target": "_self"
-    },
-    {
-      "title": "性能演示",
-      "href": "http://192.168.187.141:8888/",
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
       "icon": "fa fa-bar-chart",
       "href": "",
       "target": "_self",

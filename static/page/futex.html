@@ -2,18 +2,8 @@
 <html>
 <head>
     <meta charset="utf-8">
-<<<<<<< HEAD
     <title>FUTEX</title>
     <link rel="stylesheet" href="/static/css/layui.css">
-=======
-    <title>GPU</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="../lib/layui-v2.6.3/css/layui.css" media="all">
-    <link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
-    <link rel="stylesheet" href="../css/public.css" media="all">
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
     <style>
         .top-panel {
             border: 1px solid #eceff9;
@@ -37,7 +27,6 @@
 <body>
 <div class="layuimini-container">
 <div class="layuimini-main">
-<<<<<<< HEAD
     <h1 style="text-align: center;">容器futex系统调用性能测试</h1>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="futexHashChart" style="min-height:500px;padding: 30px"></div>
@@ -112,28 +101,6 @@
             <button class="layui-btn" id="wake">wake演示</button>
         </div>
     </div>
-=======
-
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-xs12 layui-col-md6">
-            <div id="futexHashChart" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
-        </div>
-        <div class="layui-col-xs12 layui-col-md6">
-            <div id="futexWakeChart" style="background-color:#ffffff;min-height:300px;padding: 10px"></div>
-        </div>
-    </div>
-
-    <div class="layui-row layui-col-space15">
-        <div class="layui-col-xs12 layui-col-md9">
-            <div id="echarts-records" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
-        </div>
-        <div class="layui-col-xs12 layui-col-md3">
-            <div id="echarts-pies" style="background-color:#ffffff;min-height:400px;padding: 10px"></div>
-        </div>
-    </div>
-
-
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
 </div>
 </div>
 <script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
@@ -144,7 +111,6 @@
             layer = layui.layer,
             echarts = layui.echarts;
 
-<<<<<<< HEAD
 
         $('button').on('click', function(){
             exec_button_api(this.id);
@@ -176,13 +142,10 @@
             })
         }
 
-=======
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
         /**
          * 柱状图
          */
         var futexHashChart = echarts.init(document.getElementById('futexHashChart'), 'walden');
-<<<<<<< HEAD
         var hashTable = document.getElementById('futexHash');
 
         var optionHash = {
@@ -199,15 +162,10 @@
                 }],
                 globalCoord: false // 是否使用全局坐标系
             },
-=======
-
-        var optionHash = {
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
             title: {
                 text: '容器 futex 系统调用性能测试 —— futex hash',
                 left: 'center'
             },
-<<<<<<< HEAD
             legend: {
                 orient: 'horizontal', // 设置图例水平显示
                 x: 'center', // 设置图例水平居中
@@ -220,14 +178,6 @@
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
-=======
-            tooltip: {},
-            xAxis: {
-                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
-                axisLabel: {
-                    interval: 0,  // 强制显示所有x轴标签
-                    rotate: 30    // 旋转45度，防止标签重叠
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                 },
                 splitLine: {      // 不显示网格线
                     show: false
@@ -235,7 +185,6 @@
             },
             yAxis: {
                 name: 'operations/sec',
-<<<<<<< HEAD
                 nameLocation: 'middle',
                 nameGap: 30,
                 nameTextStyle: {
@@ -245,18 +194,10 @@
                 },
                 axisLine: {       // 不显示y轴线条
                     show: false
-=======
-                axisLine: {       // 不显示y轴线条
-                    show: false
-                },
-                splitLine: {      // 不显示网格线
-                    show: false
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                 }
             },
             series: [
                 {
-<<<<<<< HEAD
                     name: 'futex wait 操作，计算 futex 锁的 hash',
                     type: 'bar',
                     barWidth: '50%',
@@ -264,16 +205,11 @@
                         show: true, // 显示数值
                         position: 'inside' // 数值显示在柱状图的顶部
                     },
-=======
-                    type: 'bar',
-                    barWidth: '50%',
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                     data: [0, 0, 0, 0, 0, 0]
                 }
             ]
         };
 
-<<<<<<< HEAD
         // 读取JSON文件
         function loadHashJSON(callback) {
             var xobj = new XMLHttpRequest();
@@ -335,19 +271,10 @@
                 }],
                 globalCoord: false // 是否使用全局坐标系
             },
-=======
-        futexHashChart.setOption(optionHash);
-
-
-        var futexWakeChart = echarts.init(document.getElementById('futexWakeChart'), 'walden');
-
-        var optionWake = {
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
             title: {
                 text: '容器 futex 系统调用性能测试 —— futex wake-parallel',
                 left: 'center'
             },
-<<<<<<< HEAD
             legend: {
                 orient: 'horizontal', // 设置图例水平显示
                 x: 'center', // 设置图例水平居中
@@ -360,14 +287,6 @@
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
-=======
-            tooltip: {},
-            xAxis: {
-                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
-                axisLabel: {
-                    interval: 0,  // 强制显示所有x轴标签
-                    rotate: 30    // 旋转45度，防止标签重叠
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                 },
                 splitLine: {      // 不显示网格线
                     show: false
@@ -375,7 +294,6 @@
             },
             yAxis: {
                 name: "平均每个线程被唤醒的时间（μs）",
-<<<<<<< HEAD
                 nameLocation: 'middle',
                 nameGap: 30,
                 nameTextStyle: {
@@ -385,18 +303,10 @@
                 },
                 axisLine: {       // 不显示y轴线条
                     show: false
-=======
-                axisLine: {       // 不显示y轴线条
-                    show: false
-                },
-                splitLine: {      // 不显示网格线
-                    show: false
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                 }
             },
             series: [
                 {
-<<<<<<< HEAD
                     name: '并发futex wake操作',
                     type: 'bar',
                     barWidth: '50%',
@@ -405,16 +315,11 @@
                         show: true, // 显示数值
                         position: 'inside' // 数值显示在柱状图的顶部
                     },
-=======
-                    type: 'bar',
-                    barWidth: '50%',
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
                     data: [0, 0, 0, 0, 0, 0]
                 }
             ]
         };
 
-<<<<<<< HEAD
         // 读取JSON文件
         function loadWakeJSON(callback) {
             var xobj = new XMLHttpRequest();
@@ -458,9 +363,6 @@
 
         // 每隔一段时间更新统计图
         setInterval(updateWakeChart, 1000);
-=======
-        futexWakeChart.setOption(optionWake);
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
 
 
         // echarts 窗口缩放自适应
@@ -471,8 +373,4 @@
     });
 </script>
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> a56976d786625ee24dcc47db25ad2a8ce1a540d8
