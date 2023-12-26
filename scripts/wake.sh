@@ -1,4 +1,4 @@
-DATA="../static/api/esolation/wake.json"
+DATA="/home/yuehang/pythonProject/VK-GPU/static/api/esolation/wake.json"
 
 funecho() {
   echo '{
@@ -7,14 +7,14 @@ funecho() {
 }
 
 sleep 2
-funecho 20 0 0 0 0 0
+funecho 2000 0 0 0 0 0
 sleep 2
-funecho 20 16 0 0 0 0
+funecho 2000 16 0 0 0 0
 sleep 2
-funecho 20 16 21 0 0 0
+funecho 2000 16 21 0 0 0
 sleep 2
-funecho 20 16 21 18 0 0
+funecho 2000 16 21 18 0 0
 sleep 2
-funecho 20 16 21 18 11 0
+funecho 2000 16 21 18 11 0
 sleep 2
-funecho 20 16 21 18 11 22
+funecho 2000 16 21 18 11 22

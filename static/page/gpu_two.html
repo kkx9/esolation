@@ -106,12 +106,6 @@
                 text: 'API转发开销测试',
                 left: 'center'
             },
-<!--            legend: {-->
-<!--                orient: 'horizontal', // 设置图例水平显示-->
-<!--                x: 'center', // 设置图例水平居中-->
-<!--                y: 'bottom', // 设置图例在底部显示-->
-<!--                data:['futex wait 操作，计算 futex 锁的 hash']-->
-<!--            },-->
             tooltip: {},
             xAxis: {
                 data: ["1", "2", "4", "8", "16", "32", "48"],
@@ -238,6 +232,7 @@
                     name: 'TVM (Transformation)',
                     type: 'bar',
                     barWidth: '30%',
+                    stack: 'overhead',
                     label: {
                         show: true, // 显示数值
                         position: 'inside' // 数值显示在柱状图
@@ -249,6 +244,7 @@
                     type: 'bar',
                     barWidth: '30%',
                     color: 'orange',
+                    stack: 'overhead',
                     label: {
                         show: true, // 显示数值
                         position: 'inside' // 数值显示在柱状图
