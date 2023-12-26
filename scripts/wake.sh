@@ -1,4 +1,4 @@
-DATA="/home/yuehang/pythonProject/VK-GPU/static/api/wake.json"
+DATA="../static/api/esolation/wake.json"
 
 funecho() {
   echo '{

@@ -116,7 +116,7 @@
 
         var options = {
             iniUrl: "/static/api/init.json",    // 初始化接口
-            clearUrl: "/static/api/clear.json", // 缓存清理接口
+            clearUrl: "/clear_cache", // 缓存清理接口
             urlHashLocation: true,      // 是否打开hash定位
             bgColorDefault: false,      // 主题默认配置
             multiModule: false,          // 是否开启多模块
@@ -126,22 +126,6 @@
             maxTabNum: 20,              // 最大的tab打开数量
         };
         miniAdmin.render(options);
-
-<!--        // 百度统计代码，只统计指定域名-->
-<!--        miniTongji.render({-->
-<!--            specific: true,-->
-<!--            domains: [-->
-<!--                '99php.cn',-->
-<!--                'layuimini.99php.cn',-->
-<!--                'layuimini-onepage.99php.cn',-->
-<!--            ],-->
-<!--        });-->
-
-<!--        $('.login-out').on("click", function () {-->
-<!--            layer.msg('退出登录成功', function () {-->
-<!--                window.location = '/static/page/login-3.html';-->
-<!--            });-->
-<!--        });-->
     });
 </script>
 </body>

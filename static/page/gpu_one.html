@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Memory Pool</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .top-panel > .layui-card-body{
+            height: 60px;
+        }
+        .top-panel-number{
+            line-height:60px;
+            font-size: 30px;
+            border-right:1px solid #eceff9;
+        }
+        .top-panel-tips{
+            line-height:30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+
+<div class="layuimini-container">
+<div class="layuimini-main">
+    <div style="text-align: center;padding: 30px">
+        <button class="layui-btn" id="pool_image">RUN EXPERIMENT</button>
+    </div>
+    <h1 style="text-align: center;">Memory Pool 测试</h1>
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="imageChart1" style="min-height:500px;padding: 30px"></div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="trafficChart1" style="min-height:500px;padding: 30px"></div>
+    </div>
+    <h1 style="text-align: center;">Latency 测试</h1>
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="imageChart2" style="min-height:500px;padding: 30px"></div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="trafficChart2" style="min-height:500px;padding: 30px"></div>
+    </div>
+
+    <h1 style="text-align: center;">吞吐量测试</h1>
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="imageChart3" style="min-height:500px;padding: 30px"></div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="trafficChart3" style="min-height:500px;padding: 30px"></div>
+    </div>
+</div>
+</div>
+
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+layui.use(['jquery', 'echarts'], function(){
+      var $ = layui.jquery,
+          echarts = layui.echarts;
+
+        $('button').on('click', function(){
+            exec_button_api(this.id);
+        });
+
+        // 新增提交的方法
+        const exec_button_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`http://127.0.0.1:5000/`, options)
+            return await response.json()
+        }
+
+        window.exec_button = function(id) {
+            exec_button_api(id).then(function (ret) {
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
+
+      // 读取JSON文件
+      function loadJSON(file, callback) {
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', file, true);
+        xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            callback(xobj.responseText);
+          }
+        };
+        xobj.send(null);
+      }
+
+      // 绘制多条折线图
+      function drawPoolChart(data, chartName) {
+        var til = "";
+        if (chartName === 'imageChart1') {
+            til = 'Image Process';
+        } else {
+            til = 'Traffic';
+        }
+        var jsonData = JSON.parse(data);
+        var chart = echarts.init(document.getElementById(chartName));
+        var option = {
+          backgroundColor: {
+            type: 'linear',
+            x: 0, // 渐变起始点 x 坐标
+            y: 0, // 渐变起始点 y 坐标
+            x2: 1, // 渐变结束点 x 坐标
+            y2: 1, // 渐变结束点 y 坐标
+            colorStops: [{ // 渐变颜色的起始颜色
+                offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+            }, {
+                offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+            }],
+            globalCoord: false // 是否使用全局坐标系
+          },
+          title: {
+            text: til,
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          legend: {
+            orient: 'vertical', // 设置图例水平显示
+            x: 'right', // 设置图例水平居中
+            y: 'top', // 设置图例在底部显示
+            data:[]
+          },
+          xAxis: {
+            type: 'category',
+            name: 'Time-line(ms)',
+            nameLocation: 'middle',
+<!--            data: jsonData.time,-->
+            nameGap: 30
+          },
+          yAxis: {
+            type: 'value',
+            name: 'Memory  footprint (GB)',
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+                color: 'black',
+                fontFamily: '黑体',
+                fontSize: 16
+            },
+            axisLine: {       // 不显示y轴线条
+                show: false
+            }
+          },
+          series: []
+        };
+
+        // 添加多条折线的系列数据
+        for (var i = 0; i < jsonData.lines.length; i++) {
+          option.series.push({
+            name: jsonData.lines[i].name,
+            type: 'line',
+            data: jsonData.lines[i].data
+          });
+          option.legend.data.push(jsonData.lines[i].name)
+        }
+
+        chart.setOption(option);
+      }
+
+
+      // 定时更新统计图
+      function updatePoolChart() {
+        loadJSON('/static/api/gpu/pool_image.json', function(response) {
+          drawPoolChart(response, 'imageChart1');
+        });
+        loadJSON('/static/api/gpu/pool_traffic.json', function(response) {
+          drawPoolChart(response, 'trafficChart1');
+        });
+      }
+
+      // 初始化绘制统计图
+      updatePoolChart();
+
+      // 每隔一段时间更新统计图
+      setInterval(updatePoolChart, 1000);
+
+      // 绘制多条折线图
+      function drawLatencyChart(data, chartName) {
+        var til = "";
+        if (chartName === 'imageChart2') {
+            til = 'Image Process';
+        } else {
+            til = 'Traffic';
+        }
+        var jsonData = JSON.parse(data);
+        var chart = echarts.init(document.getElementById(chartName));
+        var option = {
+          backgroundColor: {
+            type: 'linear',
+            x: 0, // 渐变起始点 x 坐标
+            y: 0, // 渐变起始点 y 坐标
+            x2: 1, // 渐变结束点 x 坐标
+            y2: 1, // 渐变结束点 y 坐标
+            colorStops: [{ // 渐变颜色的起始颜色
+                offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+            }, {
+                offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+            }],
+            globalCoord: false // 是否使用全局坐标系
+          },
+          title: {
+            text: til,
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross'
+            }
+          },
+          legend: {
+            orient: 'vertical', // 设置图例水平显示
+            x: 'right', // 设置图例水平居中
+            y: 'top', // 设置图例在底部显示
+            data:[]
+          },
+          xAxis: [],
+          yAxis: {
+            type: 'value',
+            name: 'CDF',
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+                color: 'black',
+                fontFamily: '黑体',
+                fontSize: 16
+            },
+            splitLine: {      // 不显示网格线
+                show: false
+            }
+          },
+          series: []
+        };
+
+        // 添加多条折线的系列数据
+        for (var i = 0; i < jsonData.lines.length; i++) {
+          if (i === 0) {
+              option.xAxis.push({
+                type: 'category',
+                data: jsonData.lines[i].data1,
+                name: 'Latency(s)',
+                nameLocation: 'middle',
+                nameGap: 30,
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+              });
+          } else {
+              option.xAxis.push({
+                type: 'category',
+                data: jsonData.lines[i].data1,
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+              });
+          }
+          option.series.push({
+            name: jsonData.lines[i].name,
+            type: 'line',
+            data: jsonData.lines[i].data2
+          });
+          option.legend.data.push(jsonData.lines[i].name);
+        }
+
+        chart.setOption(option);
+      }
+
+
+      // 定时更新统计图
+      function updateLatencyChart() {
+        loadJSON('/static/api/gpu/latency_image.json', function(response) {
+          drawLatencyChart(response, 'imageChart2');
+        });
+        loadJSON('/static/api/gpu/latency_traffic.json', function(response) {
+          drawLatencyChart(response, 'trafficChart2');
+        });
+      }
+
+      // 初始化绘制统计图
+      updateLatencyChart();
+
+      // 每隔一段时间更新统计图
+      setInterval(updateLatencyChart, 1000);
+
+      // 绘制多条折线图
+      function drawPutChart(data, chartName) {
+        var til = "";
+        if (chartName === 'imageChart3') {
+            til = 'Image Process';
+        } else {
+            til = 'Traffic';
+        }
+        var jsonData = JSON.parse(data);
+        var chart = echarts.init(document.getElementById(chartName));
+        var option = {
+          backgroundColor: {
+            type: 'linear',
+            x: 0, // 渐变起始点 x 坐标
+            y: 0, // 渐变起始点 y 坐标
+            x2: 1, // 渐变结束点 x 坐标
+            y2: 1, // 渐变结束点 y 坐标
+            colorStops: [{ // 渐变颜色的起始颜色
+                offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+            }, {
+                offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+            }],
+            globalCoord: false // 是否使用全局坐标系
+          },
+          title: {
+            text: til,
+            left: 'center'
+          },
+          tooltip: {},
+          xAxis: {
+            data: ["INFless", "Astraea", "Stream-only", "StreamBox"],
+            axisLabel: {
+                interval: 0,  // 强制显示所有x轴标签
+                rotate: 0    // 旋转
+            },
+            splitLine: {      // 不显示网格线
+                show: false
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: 'Throughput(reqs/s)',
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+                color: 'black',
+                fontFamily: '黑体',
+                fontSize: 16
+            },
+            axisLine: {       // 不显示y轴线条
+                show: false
+            }
+          },
+          series: [
+              {
+                type: 'bar',
+                barWidth: '50%',
+                label: {
+                    show: true, // 显示数值
+                    position: 'inside' // 数值显示在柱状图
+                },
+                itemStyle: {
+                    normal: {
+                        color: function(params) {
+                            var colorList = ['#33CCFF', 'orange', 'grey', '#FFCC33'];
+                            return colorList[params.dataIndex];
+                        }
+                    }
+                },
+                data: [0, 0, 0, 0]
+              }
+          ]
+        };
+
+        // 添加多条折线的系列数据
+        for (var i = 0; i < jsonData.data.length; i++) {
+          option.series[0].data[i] = jsonData.data[i];
+        }
+        chart.setOption(option);
+      }
+
+
+      // 定时更新统计图
+      function updatePutChart() {
+        loadJSON('/static/api/gpu/put_image.json', function(response) {
+          drawPutChart(response, 'imageChart3');
+        });
+        loadJSON('/static/api/gpu/put_traffic.json', function(response) {
+          drawPutChart(response, 'trafficChart3');
+        });
+      }
+
+      // 初始化绘制统计图
+      updatePutChart();
+
+      // 每隔一段时间更新统计图
+      setInterval(updatePutChart, 1000);
+
+        // echarts 窗口缩放自适应
+      window.onresize = function () {
+          echartsRecords.resize();
+      }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PAGECACHE</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+    <style>
+        .top-panel {
+            border: 1px solid #eceff9;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .top-panel > .layui-card-body{
+            height: 60px;
+        }
+        .top-panel-number{
+            line-height:60px;
+            font-size: 30px;
+            border-right:1px solid #eceff9;
+        }
+        .top-panel-tips{
+            line-height:30px;
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+<div class="layuimini-main">
+    <h1 style="text-align: center;">pagecache测试</h1>
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="chart1" style="min-height:500px;padding: 30px"></div>
+
+        <div style="padding: 30px">
+            <button class="layui-btn" id="page1">启动一个容器</button>
+        </div>
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="chart2" style="min-height:500px;padding: 30px"></div>
+
+        <div style="padding: 30px">
+            <button class="layui-btn" id="page2">启动所有容器</button>
+        </div>
+    </div>
+</div>
+</div>
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+
+        $('button').on('click', function(){
+            exec_button_api(this.id);
+        });
+
+        // 新增提交的方法
+        const exec_button_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/button/${id}`, options)
+            return await response.json()
+        }
+
+        window.exec_button = function(id) {
+            exec_button_api(id).then(function (ret) {
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
+
+        // 读取JSON文件
+        function loadJSON(file, callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', file, true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawChart(data, chartName) {
+            var jsonData = JSON.parse(data);
+            var Chart = echarts.init(document.getElementById(chartName), 'walden');
+            var option = {
+                backgroundColor: {
+                    type: 'linear',
+                    x: 0, // 渐变起始点 x 坐标
+                    y: 0, // 渐变起始点 y 坐标
+                    x2: 1, // 渐变结束点 x 坐标
+                    y2: 1, // 渐变结束点 y 坐标
+                    colorStops: [{ // 渐变颜色的起始颜色
+                        offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                    }, {
+                        offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                    }],
+                    globalCoord: false // 是否使用全局坐标系
+                },
+                title: {
+                    text: '测试',
+                    left: 'center'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: ['容器1', '容器2', '容器3', '容器4', '容器5'],
+                    axisLabel: {
+                        interval: 0,  // 强制显示所有x轴标签
+                        rotate: 0    // 旋转45度，防止标签重叠
+                    },
+                    splitLine: {      // 不显示网格线
+                        show: false
+                    }
+                },
+                yAxis: {
+                    name: 'Charged page cache (GB)',
+                    nameLocation: 'middle',
+                    nameGap: 30,
+                    nameTextStyle: {
+                        color: 'black',
+                        fontFamily: '黑体',
+                        fontSize: 16
+                    },
+                    axisLine: {       // 不显示y轴线条
+                        show: false
+                    },
+                    min: 0,
+                    max: 1
+                },
+                series: [
+                    {
+                        type: 'bar',
+                        barWidth: '50%',
+                        label: {
+                            show: true, // 显示数值
+                            position: 'inside' // 数值显示在柱状图的内部
+                        },
+                        data: [0, 0, 0, 0, 0]
+                    }
+                ]
+            };
+            for (var i = 0; i < jsonData.data.length; i++) {
+              option.series[0].data[i] = jsonData.data[i];
+            }
+            Chart.setOption(option);
+        }
+
+        // 定时更新统计图
+        function updateChart() {
+            loadJSON('/static/api/esolation/page1.json', function(response) {
+              drawChart(response, 'chart1');
+            });
+            loadJSON('/static/api/esolation/page2.json', function(response) {
+              drawChart(response, 'chart2');
+            });
+        }
+
+         // 初始化绘制统计图
+        updateChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateChart, 1000);
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
+</body>
+</html>

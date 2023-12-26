@@ -4,7 +4,7 @@
     "href": "/static/page/welcome.html"
   },
   "logoInfo": {
-    "title": "VK-GPU",
+    "title": "ESOLATION",
     "image": "/static/images/logo.png",
     "href": ""
   },
@@ -16,22 +16,36 @@
         "target": "_self"
     },
     {
-      "title": "futex演示",
-      "href": "/static/page/futex.html",
+      "title": "ESOLATION演示",
       "icon": "fa fa-bar-chart",
-      "target": "_self"
-    },
-    {
-      "title": "日志演示",
-      "href": "/static/page/log.html",
-      "icon": "fa fa-file-text",
-      "target": "_self"
-    },
-    {
-      "title": "性能演示",
-      "href": "/static/page/performance.html",
-      "icon": "fa fa-bar-chart",
-      "target": "_self"
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "futex演示",
+          "href": "/static/page/futex.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "pagecache演示",
+          "href": "/static/page/pagecache.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "日志演示",
+          "href": "/static/page/log.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        },
+        {
+          "title": "性能演示",
+          "href": "/static/page/performance.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        }
+      ]
     },
     {
       "title": "GPU演示",
@@ -40,25 +54,13 @@
       "target": "_self",
       "child": [
         {
-          "title": "Memory Pool",
-          "href": "/static/page/memorypool.html",
+          "title": "负载测试",
+          "href": "/static/page/gpu_one.html",
           "icon": "fa fa-pie-chart",
           "target": "_self"
         },
         {
-          "title": "Latency",
-          "href": "/static/page/latency.html",
-          "icon": "fa fa-pie-chart",
-          "target": "_self"
-        },
-        {
-          "title": "Throughput",
-          "href": "/static/page/throughput.html",
-          "icon": "fa fa-pie-chart",
-          "target": "_self"
-        },
-        {
-          "title": "实验二",
+          "title": "开销测试",
           "href": "/static/page/gpu_two.html",
           "icon": "fa fa-pie-chart",
           "target": "_self"

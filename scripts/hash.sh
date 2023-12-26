@@ -1,4 +1,4 @@
-DATA="/home/yuehang/pythonProject/VK-GPU/static/api/hash.json"
+DATA="/home/yuehang/pythonProject/VK-GPU/static/api/esolation/hash.json"
 
 funecho() {
   echo '{

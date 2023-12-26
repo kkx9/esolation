@@ -1,7 +1,10 @@
+import json
+import os
+
 import config
 import paramiko
 import subprocess
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from extensions import register_extension, db
 from orms import ContainerORM
 
@@ -11,6 +14,49 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/clear_cache', methods=['GET'])
+def clear_cache():
+    esolation = './static/api/esolation/'
+    gpu = './static/api/gpu/'
+
+    esolations = os.listdir(esolation)
+    gpus = os.listdir(gpu)
+    try:
+        for e in esolations:
+            with open(esolation + e, 'r') as file:
+                data = json.load(file)
+            for key in data:
+                data[key] = []
+            file.close()
+            with open(esolation + e, 'w') as file:
+                json.dump(data, file)
+            file.close()
+        for g in gpus:
+            with open(gpu + g, 'r') as file:
+                data = json.load(file)
+            if 'pool' in g or 'latency' in g:
+                for item in data['lines']:
+                    for key in item:
+                        item[key] = ""
+            else:
+                for key in data:
+                    data[key] = []
+            file.close()
+            with open(gpu + g, 'w') as file:
+                json.dump(data, file)
+            file.close()
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "code": 2,
+            "msg": e
+        })
+    return jsonify({
+        "code": 1,
+        "msg": "清理缓存成功"
+    })
 
 
 @app.cli.command()

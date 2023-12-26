@@ -41,7 +41,7 @@
                         <th>gvisor-ptrace</th>
                         <th>gvisor-kvm</th>
                         <th>kata</th>
-                        <th>vkernel</th>
+                        <th>esolation</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,7 +79,7 @@
                         <th>gvisor-ptrace</th>
                         <th>gvisor-kvm</th>
                         <th>kata</th>
-                        <th>vkernel</th>
+                        <th>esolation</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -174,7 +174,7 @@
             },
             tooltip: {},
             xAxis: {
-                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "esolation"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
@@ -214,7 +214,7 @@
         function loadHashJSON(callback) {
             var xobj = new XMLHttpRequest();
             xobj.overrideMimeType("application/json");
-            xobj.open('GET', '/static/api/hash.json', true);
+            xobj.open('GET', '/static/api/esolation/hash.json', true);
             xobj.onreadystatechange = function () {
               if (xobj.readyState == 4 && xobj.status == "200") {
                 callback(xobj.responseText);
@@ -283,7 +283,7 @@
             },
             tooltip: {},
             xAxis: {
-                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "vkernel"],
+                data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "esolation"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
@@ -324,7 +324,7 @@
         function loadWakeJSON(callback) {
             var xobj = new XMLHttpRequest();
             xobj.overrideMimeType("application/json");
-            xobj.open('GET', '/static/api/wake.json', true);
+            xobj.open('GET', '/static/api/esolation/wake.json', true);
             xobj.onreadystatechange = function () {
               if (xobj.readyState == 4 && xobj.status == "200") {
                 callback(xobj.responseText);
