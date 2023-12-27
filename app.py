@@ -1,6 +1,8 @@
 import json
 import os
 
+import requests
+
 import config
 import paramiko
 import subprocess
@@ -14,6 +16,14 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/test_data', methods=['POST'])
+def test_data():
+    data = {'Application': 'image_process', 'System': 'streambox'}
+    return data
+    # response = requests.post(url='http://127.0.0.1:5000/static/page/gpu_one.html', data=data)
+    # print(response)
 
 
 @app.route('/clear_cache', methods=['GET'])

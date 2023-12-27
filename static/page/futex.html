@@ -5,33 +5,25 @@
     <title>FUTEX</title>
     <link rel="stylesheet" href="/static/css/layui.css">
     <style>
-        .top-panel {
-            border: 1px solid #eceff9;
-            border-radius: 5px;
-            text-align: center;
+        .page-title {
+          font-size: 24px;
+          font-weight: bold;
+          /* 其他样式... */
         }
-        .top-panel > .layui-card-body{
-            height: 60px;
-        }
-        .top-panel-number{
-            line-height:60px;
-            font-size: 30px;
-            border-right:1px solid #eceff9;
-        }
-        .top-panel-tips{
-            line-height:30px;
-            font-size: 12px
+        .space-below {
+          margin-bottom: 30px; /* 在大标题下方创建 20px 的空白空间 */
         }
     </style>
 </head>
 <body>
 <div class="layuimini-container">
 <div class="layuimini-main">
-    <h1 style="text-align: center;">容器futex系统调用性能测试</h1>
+    <h1 class="page-title" style="text-align: center;">容器futex系统调用性能测试</h1>
+    <div class="space-below"></div>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="futexHashChart" style="min-height:500px;padding: 30px"></div>
-
-        <div style="overflow: auto; max-height: 400px; margin-left: 5px; margin-right: 10px;">
+        <div class="space-below"></div>
+        <div style="overflow: auto; max-height: 400px; margin-left: 5px;">
             <table id="futexHash" class="layui-table" style="width: 100%;">
                 <thead>
                     <tr>
@@ -68,8 +60,8 @@
 
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="futexWakeChart" style="min-height:500px;padding: 30px"></div>
-
-        <div style="overflow: auto; max-height: 400px; margin-right: 5px;">
+        <div class="space-below"></div>
+        <div style="overflow: auto; max-height: 400px; margin-left: 5px; margin-right: 10px;">
             <table id="futexWake" class="layui-table" style="width: 100%;">
                 <thead>
                     <tr>
@@ -113,7 +105,7 @@
 
 
         $('button').on('click', function(){
-            exec_button_api(this.id);
+            window.exec_button(this.id);
         });
 
         // 新增提交的方法
@@ -163,7 +155,7 @@
                 globalCoord: false // 是否使用全局坐标系
             },
             title: {
-                text: '容器 futex 系统调用性能测试 —— futex hash',
+                text: 'futex hash',
                 left: 'center'
             },
             legend: {
@@ -173,11 +165,14 @@
                 data:['futex wait 操作，计算 futex 锁的 hash']
             },
             tooltip: {},
+            grid: {
+                containLabel: true // 将标签包含在内
+            },
             xAxis: {
                 data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "esolation"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
-                    rotate: 0    // 旋转45度，防止标签重叠
+                    rotate: 15    // 旋转45度，防止标签重叠
                 },
                 splitLine: {      // 不显示网格线
                     show: false
@@ -185,13 +180,13 @@
             },
             yAxis: {
                 name: 'operations/sec',
-                nameLocation: 'middle',
-                nameGap: 30,
-                nameTextStyle: {
-                    color: 'black',
-                    fontFamily: '黑体',
-                    fontSize: 16
-                },
+<!--                nameLocation: 'middle',-->
+<!--                nameGap: 30,-->
+<!--                nameTextStyle: {-->
+<!--                    color: 'black',-->
+<!--                    fontFamily: '黑体',-->
+<!--                    fontSize: 16-->
+<!--                },-->
                 axisLine: {       // 不显示y轴线条
                     show: false
                 }
@@ -272,7 +267,7 @@
                 globalCoord: false // 是否使用全局坐标系
             },
             title: {
-                text: '容器 futex 系统调用性能测试 —— futex wake-parallel',
+                text: 'futex wake-parallel',
                 left: 'center'
             },
             legend: {
@@ -282,28 +277,31 @@
                 data:['并发futex wake操作']
             },
             tooltip: {},
+            grid: {
+                containLabel: true // 将标签包含在内
+            },
             xAxis: {
                 data: ["docker-secure", "docker-insecure", "gvisor-ptrace", "gvisor-kvm", "kata", "esolation"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
-                    rotate: 0    // 旋转45度，防止标签重叠
+                    rotate: 15    // 旋转45度，防止标签重叠
                 },
                 splitLine: {      // 不显示网格线
                     show: false
                 }
             },
             yAxis: {
-                name: "平均每个线程被唤醒的时间（μs）",
-                nameLocation: 'middle',
-                nameGap: 30,
-                nameTextStyle: {
-                    color: 'black',
-                    fontFamily: '黑体',
-                    fontSize: 16
-                },
+                name: "每线程平均唤醒时间 (μs)",
+<!--                nameLocation: 'end',-->
+<!--                nameGap: 0,-->
+<!--                nameTextStyle: {-->
+<!--                    color: 'black',-->
+<!--                    fontFamily: '黑体',-->
+<!--                    fontSize: 16-->
+<!--                },-->
                 axisLine: {       // 不显示y轴线条
                     show: false
-                }
+                },
             },
             series: [
                 {
@@ -341,9 +339,9 @@
               if (i >= 1 && jsonData.data[0] != 0 && jsonData.data[i] != 0) {
                 var cellValue = jsonData.data[i] / jsonData.data[0] - 1;
                 if (cellValue > 0) {
-                    tbody.rows[0].cells[i+1].style.color = 'green';
-                } else if (cellValue < 0) {
                     tbody.rows[0].cells[i+1].style.color = 'red';
+                } else if (cellValue < 0) {
+                    tbody.rows[0].cells[i+1].style.color = 'green';
                 }
                 tbody.rows[0].cells[i+1].innerHTML = (cellValue * 100).toFixed(2) + '%';
               }

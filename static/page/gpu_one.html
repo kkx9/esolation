@@ -4,25 +4,6 @@
     <meta charset="utf-8">
     <title>Memory Pool</title>
     <link rel="stylesheet" href="/static/css/layui.css">
-    <style>
-        .top-panel {
-            border: 1px solid #eceff9;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .top-panel > .layui-card-body{
-            height: 60px;
-        }
-        .top-panel-number{
-            line-height:60px;
-            font-size: 30px;
-            border-right:1px solid #eceff9;
-        }
-        .top-panel-tips{
-            line-height:30px;
-            font-size: 12px
-        }
-    </style>
 </head>
 <body>
 
@@ -32,11 +13,11 @@
         <button class="layui-btn" id="pool_image">RUN EXPERIMENT</button>
     </div>
     <h1 style="text-align: center;">Memory Pool 测试</h1>
-    <div style="text-align: center;">
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="imageChart1" style="min-height:500px;padding: 30px"></div>
     </div>
 
-    <div style="text-align: center;">
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="trafficChart1" style="min-height:500px;padding: 30px"></div>
     </div>
     <h1 style="text-align: center;">Latency 测试</h1>
@@ -67,7 +48,36 @@ layui.use(['jquery', 'echarts'], function(){
           echarts = layui.echarts;
 
         $('button').on('click', function(){
-            exec_button_api(this.id);
+<!--            updatePoolChart();-->
+<!--            exec_button_api(this.id);-->
+          const fetchData = () => {
+            fetch('/test_data', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              // 处理接收到的数据
+              console.log(data);
+              if (data.Application === 'image_process') {
+                switch (data.System) {
+                    case 'streambox':
+                        updatePoolChart();
+                }
+              }
+
+              // 继续持续接收数据
+<!--              fetchData();-->
+            })
+            .catch(error => {
+              console.error('发生错误：', error);
+            });
+          };
+
+          // 开始持续接收数据
+          fetchData();
         });
 
         // 新增提交的方法
@@ -76,22 +86,14 @@ layui.use(['jquery', 'echarts'], function(){
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
             }
-            const response = await fetch(`http://127.0.0.1:5000/`, options)
+            const response = await fetch(`http://222.20.94.68:5000/`, options)
             return await response.json()
         }
 
         window.exec_button = function(id) {
             exec_button_api(id).then(function (ret) {
-                if (!ret.code) {
-                    layer.msg(ret.msg, {
-                        icon: 1,
-                        time: 1000,
-                    });
-                } else {
-                    layer.msg(ret.msg, {
-                        icon: 2,
-                        time: 1000,
-                    });
+                if (ret.Application === 'image_process') {
+
                 }
             })
         }
@@ -147,7 +149,7 @@ layui.use(['jquery', 'echarts'], function(){
           },
           xAxis: {
             type: 'category',
-            name: 'Time-line(ms)',
+            name: 'Time-line (ms)',
             nameLocation: 'middle',
 <!--            data: jsonData.time,-->
             nameGap: 30
@@ -155,13 +157,13 @@ layui.use(['jquery', 'echarts'], function(){
           yAxis: {
             type: 'value',
             name: 'Memory  footprint (GB)',
-<!--            nameLocation: 'middle',-->
-<!--            nameGap: 30,-->
-<!--            nameTextStyle: {-->
-<!--                color: 'black',-->
-<!--                fontFamily: '黑体',-->
-<!--                fontSize: 16-->
-<!--            },-->
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+                color: 'black',
+                fontFamily: '黑体',
+                fontSize: 16
+            },
             axisLine: {       // 不显示y轴线条
                 show: false
             }
@@ -193,11 +195,11 @@ layui.use(['jquery', 'echarts'], function(){
         });
       }
 
-      // 初始化绘制统计图
-      updatePoolChart();
+<!--      // 初始化绘制统计图-->
+<!--      updatePoolChart();-->
 
-      // 每隔一段时间更新统计图
-      setInterval(updatePoolChart, 1000);
+<!--      // 每隔一段时间更新统计图-->
+<!--      setInterval(updatePoolChart, 1000);-->
 
       // 绘制多条折线图
       function drawLatencyChart(data, chartName) {
@@ -343,7 +345,7 @@ layui.use(['jquery', 'echarts'], function(){
           },
           yAxis: {
             type: 'value',
-            name: 'Throughput(reqs/s)',
+            name: 'Throughput (reqs/s)',
             nameLocation: 'middle',
             nameGap: 30,
             nameTextStyle: {

@@ -1,0 +1,43 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "/static/page/welcome.html"
+  },
+  "logoInfo": {
+    "title": "ESOLATION",
+    "image": "/static/images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+        "title": "主页",
+        "href": "/static/page/welcome.html",
+        "icon": "fa fa-home",
+        "target": "_self"
+    },
+    {
+      "title": "futex演示",
+      "href": "/static/page/futex.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
+      "title": "pagecache演示",
+      "href": "/static/page/pagecache.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
+      "title": "日志演示",
+      "href": "/static/page/log.html",
+      "icon": "fa fa-file-text",
+      "target": "_self"
+    },
+    {
+      "title": "性能演示",
+      "href": "/static/page/performance.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    }
+  ]
+}

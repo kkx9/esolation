@@ -28,6 +28,7 @@
 <div class="layuimini-container">
 <div class="layuimini-main">
     <h1 style="text-align: center;">pagecache测试</h1>
+    <div class="space-below"></div>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="chart1" style="min-height:500px;padding: 30px"></div>
 
@@ -118,8 +119,11 @@
                     left: 'center'
                 },
                 tooltip: {},
+                grid: {
+                    containLabel: true // 将标签包含在内
+                },
                 xAxis: {
-                    data: ['容器1', '容器2', '容器3', '容器4', '容器5'],
+                    data: ['httpd', 'jetty', 'nginx', 'tomcat', 'glassfish'],
                     axisLabel: {
                         interval: 0,  // 强制显示所有x轴标签
                         rotate: 0    // 旋转45度，防止标签重叠
@@ -130,13 +134,13 @@
                 },
                 yAxis: {
                     name: 'Charged page cache (GB)',
-                    nameLocation: 'middle',
-                    nameGap: 30,
-                    nameTextStyle: {
-                        color: 'black',
-                        fontFamily: '黑体',
-                        fontSize: 16
-                    },
+<!--                    nameLocation: 'top',-->
+<!--                    nameGap: 60,-->
+<!--                    nameTextStyle: {-->
+<!--                        color: 'black',-->
+<!--                        fontFamily: '黑体',-->
+<!--                        fontSize: 16-->
+<!--                    },-->
                     axisLine: {       // 不显示y轴线条
                         show: false
                     },
