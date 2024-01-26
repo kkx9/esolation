@@ -47,56 +47,33 @@ layui.use(['jquery', 'echarts'], function(){
       var $ = layui.jquery,
           echarts = layui.echarts;
 
-        $('button').on('click', function(){
-<!--            updatePoolChart();-->
-<!--            exec_button_api(this.id);-->
-          const fetchData = () => {
-            fetch('/test_data', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              }
-            })
-            .then(response => response.json())
-            .then(data => {
-              // 处理接收到的数据
-              console.log(data);
-              if (data.Application === 'image_process') {
-                switch (data.System) {
-                    case 'streambox':
-                        updatePoolChart();
-                }
-              }
+      $('button').on('click', async function(){
+            var first = 0
+            for (var i = 0; i < 4; i++) {
+                await exec_button_api("image").then(function (ret) {
+                    updatePoolChart(ret.n, 0);
+                    updateLatencyChart(ret.n, 0);
+                    updatePutChart(ret.n, 0);
+                    first = ret.n;
+                })
+            }
+            for (var i = 0; i < 4; i++) {
+                await exec_button_api("traffic").then(function (ret) {
+                    updatePoolChart(first, ret.m);
+                    updateLatencyChart(first, ret.m);
+                    updatePutChart(first, ret.m);
+                })
+            }
+      });
 
-              // 继续持续接收数据
-<!--              fetchData();-->
-            })
-            .catch(error => {
-              console.error('发生错误：', error);
-            });
-          };
-
-          // 开始持续接收数据
-          fetchData();
-        });
-
-        // 新增提交的方法
-        const exec_button_api = async (id) => {
+      const exec_button_api = async (str) => {
             const options = {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
             }
-            const response = await fetch(`http://222.20.94.68:5000/`, options)
+            const response = await fetch(`http://222.20.94.68:16000/`+str, options)
             return await response.json()
-        }
-
-        window.exec_button = function(id) {
-            exec_button_api(id).then(function (ret) {
-                if (ret.Application === 'image_process') {
-
-                }
-            })
-        }
+      }
 
       // 读取JSON文件
       function loadJSON(file, callback) {
@@ -112,7 +89,7 @@ layui.use(['jquery', 'echarts'], function(){
       }
 
       // 绘制多条折线图
-      function drawPoolChart(data, chartName) {
+      function drawPoolChart(data, chartName, n) {
         var til = "";
         if (chartName === 'imageChart1') {
             til = 'Image Process';
@@ -144,6 +121,9 @@ layui.use(['jquery', 'echarts'], function(){
               type: 'cross'
             }
           },
+          grid: {
+            containLabel: true
+          },
           legend: {
             data:[]
           },
@@ -151,19 +131,11 @@ layui.use(['jquery', 'echarts'], function(){
             type: 'category',
             name: 'Time-line (ms)',
             nameLocation: 'middle',
-<!--            data: jsonData.time,-->
             nameGap: 30
           },
           yAxis: {
             type: 'value',
             name: 'Memory  footprint (GB)',
-            nameLocation: 'middle',
-            nameGap: 30,
-            nameTextStyle: {
-                color: 'black',
-                fontFamily: '黑体',
-                fontSize: 16
-            },
             axisLine: {       // 不显示y轴线条
                 show: false
             }
@@ -171,8 +143,10 @@ layui.use(['jquery', 'echarts'], function(){
           series: []
         };
 
+        let order = [2,3,1,0]
         // 添加多条折线的系列数据
-        for (var i = 0; i < jsonData.lines.length; i++) {
+        for (var j = 0; j < n; j++) {
+          var i = order[j]
           option.series.push({
             name: jsonData.lines[i].name,
             type: 'line',
@@ -186,23 +160,24 @@ layui.use(['jquery', 'echarts'], function(){
 
 
       // 定时更新统计图
-      function updatePoolChart() {
+      function updatePoolChart(n, m) {
         loadJSON('/static/api/gpu/pool_image.json', function(response) {
-          drawPoolChart(response, 'imageChart1');
+          drawPoolChart(response, 'imageChart1', n);
         });
         loadJSON('/static/api/gpu/pool_traffic.json', function(response) {
-          drawPoolChart(response, 'trafficChart1');
+          drawPoolChart(response, 'trafficChart1', m);
         });
       }
 
-<!--      // 初始化绘制统计图-->
-<!--      updatePoolChart();-->
 
-<!--      // 每隔一段时间更新统计图-->
+      // 初始化绘制统计图
+      updatePoolChart(0, 0);
+
+      // 每隔一段时间更新统计图
 <!--      setInterval(updatePoolChart, 1000);-->
 
       // 绘制多条折线图
-      function drawLatencyChart(data, chartName) {
+      function drawLatencyChart(data, chartName, n) {
         var til = "";
         if (chartName === 'imageChart2') {
             til = 'Image Process';
@@ -237,9 +212,17 @@ layui.use(['jquery', 'echarts'], function(){
           legend: {
             data:[]
           },
-          xAxis: [],
+          xAxis: [{
+                type: 'value',
+                name: 'Latency(s)',
+                nameLocation: 'middle',
+                nameGap: 30,
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+          }],
           yAxis: {
-            type: 'value',
+            type: 'category',
             name: 'CDF',
             nameLocation: 'middle',
             nameGap: 30,
@@ -250,17 +233,20 @@ layui.use(['jquery', 'echarts'], function(){
             },
             splitLine: {      // 不显示网格线
                 show: false
+            },
+            axisLine: {
+                show: false
             }
           },
           series: []
         };
 
         // 添加多条折线的系列数据
-        for (var i = 0; i < jsonData.lines.length; i++) {
-          if (i === 0) {
+        for (var i = 0; i < n; i++) {
+          if (i === -1) {
               option.xAxis.push({
-                type: 'category',
-                data: jsonData.lines[i].data1,
+                type: 'value',
+                data: jsonData.lines[i].data2,
                 name: 'Latency(s)',
                 nameLocation: 'middle',
                 nameGap: 30,
@@ -270,9 +256,12 @@ layui.use(['jquery', 'echarts'], function(){
               });
           } else {
               option.xAxis.push({
-                type: 'category',
-                data: jsonData.lines[i].data1,
+                type: 'value',
+                data: jsonData.lines[i].data2,
                 splitLine: {      // 不显示网格线
+                    show: false
+                },
+                axisLine: {
                     show: false
                 }
               });
@@ -280,7 +269,7 @@ layui.use(['jquery', 'echarts'], function(){
           option.series.push({
             name: jsonData.lines[i].name,
             type: 'line',
-            data: jsonData.lines[i].data2
+            data: jsonData.lines[i].data1
           });
           option.legend.data.push(jsonData.lines[i].name);
         }
@@ -290,23 +279,23 @@ layui.use(['jquery', 'echarts'], function(){
 
 
       // 定时更新统计图
-      function updateLatencyChart() {
+      function updateLatencyChart(n, m) {
         loadJSON('/static/api/gpu/latency_image.json', function(response) {
-          drawLatencyChart(response, 'imageChart2');
+          drawLatencyChart(response, 'imageChart2', n);
         });
         loadJSON('/static/api/gpu/latency_traffic.json', function(response) {
-          drawLatencyChart(response, 'trafficChart2');
+          drawLatencyChart(response, 'trafficChart2', m);
         });
       }
 
       // 初始化绘制统计图
-      updateLatencyChart();
+      updateLatencyChart(0, 0);
 
       // 每隔一段时间更新统计图
-      setInterval(updateLatencyChart, 1000);
+<!--      setInterval(updateLatencyChart, 1000);-->
 
       // 绘制多条折线图
-      function drawPutChart(data, chartName) {
+      function drawPutChart(data, chartName, n) {
         var til = "";
         if (chartName === 'imageChart3') {
             til = 'Image Process';
@@ -333,6 +322,9 @@ layui.use(['jquery', 'echarts'], function(){
             text: til,
           },
           tooltip: {},
+          grid: {
+            containLabel: true
+          },
           xAxis: {
             data: ["INFless", "Astraea", "Stream-only", "StreamBox"],
             axisLabel: {
@@ -346,13 +338,13 @@ layui.use(['jquery', 'echarts'], function(){
           yAxis: {
             type: 'value',
             name: 'Throughput (reqs/s)',
-            nameLocation: 'middle',
-            nameGap: 30,
-            nameTextStyle: {
-                color: 'black',
-                fontFamily: '黑体',
-                fontSize: 16
-            },
+<!--            nameLocation: 'middle',-->
+<!--            nameGap: 30,-->
+<!--            nameTextStyle: {-->
+<!--                color: 'black',-->
+<!--                fontFamily: '黑体',-->
+<!--                fontSize: 16-->
+<!--            },-->
             axisLine: {       // 不显示y轴线条
                 show: false
             }
@@ -379,7 +371,7 @@ layui.use(['jquery', 'echarts'], function(){
         };
 
         // 添加多条折线的系列数据
-        for (var i = 0; i < jsonData.data.length; i++) {
+        for (var i = 0; i < n; i++) {
           option.series[0].data[i] = jsonData.data[i];
         }
         chart.setOption(option);
@@ -387,20 +379,20 @@ layui.use(['jquery', 'echarts'], function(){
 
 
       // 定时更新统计图
-      function updatePutChart() {
+      function updatePutChart(n, m) {
         loadJSON('/static/api/gpu/put_image.json', function(response) {
-          drawPutChart(response, 'imageChart3');
+          drawPutChart(response, 'imageChart3', n);
         });
         loadJSON('/static/api/gpu/put_traffic.json', function(response) {
-          drawPutChart(response, 'trafficChart3');
+          drawPutChart(response, 'trafficChart3', m);
         });
       }
 
       // 初始化绘制统计图
-      updatePutChart();
+      updatePutChart(0, 0);
 
       // 每隔一段时间更新统计图
-      setInterval(updatePutChart, 1000);
+<!--      setInterval(updatePutChart, 1000);-->
 
         // echarts 窗口缩放自适应
       window.onresize = function () {

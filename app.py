@@ -1,7 +1,7 @@
 import json
 import os
 
-import requests
+import time
 
 import config
 import paramiko
@@ -26,47 +26,47 @@ def test_data():
     # print(response)
 
 
-@app.route('/clear_cache', methods=['GET'])
-def clear_cache():
-    esolation = './static/api/esolation/'
-    gpu = './static/api/gpu/'
-
-    esolations = os.listdir(esolation)
-    gpus = os.listdir(gpu)
-    try:
-        for e in esolations:
-            with open(esolation + e, 'r') as file:
-                data = json.load(file)
-            for key in data:
-                data[key] = []
-            file.close()
-            with open(esolation + e, 'w') as file:
-                json.dump(data, file)
-            file.close()
-        for g in gpus:
-            with open(gpu + g, 'r') as file:
-                data = json.load(file)
-            if 'pool' in g or 'latency' in g:
-                for item in data['lines']:
-                    for key in item:
-                        item[key] = ""
-            else:
-                for key in data:
-                    data[key] = []
-            file.close()
-            with open(gpu + g, 'w') as file:
-                json.dump(data, file)
-            file.close()
-    except Exception as e:
-        print(e)
-        return jsonify({
-            "code": 2,
-            "msg": e
-        })
-    return jsonify({
-        "code": 1,
-        "msg": "清理缓存成功"
-    })
+# @app.route('/clear_cache', methods=['GET'])
+# def clear_cache():
+#     esolation = './static/api/esolation/'
+#     gpu = './static/api/gpu/'
+#
+#     esolations = os.listdir(esolation)
+#     gpus = os.listdir(gpu)
+#     try:
+#         for e in esolations:
+#             with open(esolation + e, 'r') as file:
+#                 data = json.load(file)
+#             for key in data:
+#                 data[key] = []
+#             file.close()
+#             with open(esolation + e, 'w') as file:
+#                 json.dump(data, file)
+#             file.close()
+#         for g in gpus:
+#             with open(gpu + g, 'r') as file:
+#                 data = json.load(file)
+#             if 'pool' in g or 'latency' in g:
+#                 for item in data['lines']:
+#                     for key in item:
+#                         item[key] = ""
+#             else:
+#                 for key in data:
+#                     data[key] = []
+#             file.close()
+#             with open(gpu + g, 'w') as file:
+#                 json.dump(data, file)
+#             file.close()
+#     except Exception as e:
+#         print(e)
+#         return jsonify({
+#             "code": 2,
+#             "msg": e
+#         })
+#     return jsonify({
+#         "code": 1,
+#         "msg": "清理缓存成功"
+#     })
 
 
 @app.cli.command()
@@ -190,6 +190,38 @@ def exec_scripts(s):
 @app.post('/api/button/<string:id>')
 def api_exec_button(id):
     return exec_scripts(id)
+
+
+n = 0
+
+
+@app.post('/api/button/image')
+def api_exec_button1():
+    time.sleep(5)
+    global n
+    if n == 4:
+        n = 0
+    n += 1
+    print(n)
+    return {
+        'n': n
+    }
+
+
+m = 0
+
+
+@app.post('/api/button/traffic')
+def api_exec_button2():
+    time.sleep(5)
+    global m
+    if m == 4:
+        m = 0
+    m += 1
+    print(m)
+    return {
+        'm': m
+    }
 
 
 @app.delete('/api/del/<int:id>')

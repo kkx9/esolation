@@ -16,28 +16,24 @@
         "target": "_self"
     },
     {
-      "title": "futex演示",
-      "href": "/static/page/futex.html",
-      "icon": "fa fa-bar-chart",
-      "target": "_self"
-    },
-    {
-      "title": "pagecache演示",
-      "href": "/static/page/pagecache.html",
-      "icon": "fa fa-bar-chart",
-      "target": "_self"
-    },
-    {
-      "title": "日志演示",
-      "href": "/static/page/log.html",
-      "icon": "fa fa-file-text",
-      "target": "_self"
-    },
-    {
-      "title": "性能演示",
-      "href": "/static/page/performance.html",
-      "icon": "fa fa-bar-chart",
-      "target": "_self"
+      "title": "GPU演示",
+      "icon": "fa fa-pie-chart",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "负载测试",
+          "href": "/static/page/gpu_one.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        },
+        {
+          "title": "开销测试",
+          "href": "/static/page/gpu_two.html",
+          "icon": "fa fa-pie-chart",
+          "target": "_self"
+        }
+      ]
     }
   ]
 }
