@@ -1,0 +1,31 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "/static/page/welcome.html"
+  },
+  "logoInfo": {
+    "title": "ESOLATION",
+    "image": "/static/images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+        "title": "主页",
+        "href": "/static/page/welcome.html",
+        "icon": "fa fa-home",
+        "target": "_self"
+    },
+    {
+      "title": "实验一",
+      "href": "/static/page/gpu_one.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    },
+    {
+      "title": "实验二",
+      "href": "/static/page/gpu_two.html",
+      "icon": "fa fa-bar-chart",
+      "target": "_self"
+    }
+  ]
+}

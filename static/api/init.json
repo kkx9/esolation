@@ -16,21 +16,59 @@
         "target": "_self"
     },
     {
-      "title": "GPU演示",
-      "icon": "fa fa-pie-chart",
+      "title": "vkernel",
+      "icon": "fa fa-bar-chart",
       "href": "",
       "target": "_self",
       "child": [
         {
-          "title": "负载测试",
-          "href": "/static/page/gpu_one.html",
-          "icon": "fa fa-pie-chart",
+          "title": "HotelReservation",
+          "href": "/static/page/hotel.html",
+          "icon": "fa fa-bar-chart",
           "target": "_self"
         },
         {
-          "title": "开销测试",
-          "href": "/static/page/gpu_two.html",
-          "icon": "fa fa-pie-chart",
+          "title": "MovieReview",
+          "href": "/static/page/movie.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "RetwisPipeline",
+          "href": "/static/page/pipeline.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "Terasort",
+          "href": "/static/page/terasort.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        }
+      ]
+    },
+    {
+      "title": "GPU",
+      "icon": "fa fa-bar-chart",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "ImageProcess",
+          "href": "/static/page/image.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "ObjectSegementation",
+          "href": "/static/page/object.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "Traffic",
+          "href": "/static/page/traffic.html",
+          "icon": "fa fa-bar-chart",
           "target": "_self"
         }
       ]

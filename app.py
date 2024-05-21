@@ -18,6 +18,44 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/vkernel_data', methods=['POST'])
+def vkernel_data():
+    data = request.get_json()
+    print(data)
+    runtime, application = data["runtime"], data["appname"]
+    filename = 'static/api/vkernel/' + application + '.json'
+    with open(filename, 'r') as f:
+        old_data = json.load(f)
+    if runtime == 'vkernel':
+        old_data['data'][0], old_data['data'][1] = data['throughput'], data['total_time']
+    elif runtime == 'kata':
+        old_data['data'][2], old_data['data'][3] = data['throughput'], data['total_time']
+    else:
+        old_data['data'][4], old_data['data'][5] = data['throughput'], data['total_time']
+
+    with open(filename, 'w') as f:
+        json.dump(old_data, f, ensure_ascii=False, indent=4)
+    return jsonify({'message': 'Success.'}), 201
+
+
+@app.route('/gpu_data', methods=['POST'])
+def gpu_data():
+    data = request.get_json()
+    print(data)
+    mode, application = data["mode"], data["application"]
+    filename = 'static/api/gpu/' + application + '.json'
+    with open(filename, 'r') as f:
+        old_data = json.load(f)
+    if mode == 'normal':
+        old_data['data'][0], old_data['data'][1] = data['avememory'], data['throughput']
+    else:
+        old_data['data'][2], old_data['data'][3] = data['avememory'], data['throughput']
+
+    with open(filename, 'w') as f:
+        json.dump(old_data, f, ensure_ascii=False, indent=4)
+    return jsonify({'message': 'Success.'}), 201
+
+
 @app.route('/test_data', methods=['POST'])
 def test_data():
     data = {'Application': 'image_process', 'System': 'streambox'}
@@ -26,47 +64,38 @@ def test_data():
     # print(response)
 
 
-# @app.route('/clear_cache', methods=['GET'])
-# def clear_cache():
-#     esolation = './static/api/esolation/'
-#     gpu = './static/api/gpu/'
-#
-#     esolations = os.listdir(esolation)
-#     gpus = os.listdir(gpu)
-#     try:
-#         for e in esolations:
-#             with open(esolation + e, 'r') as file:
-#                 data = json.load(file)
-#             for key in data:
-#                 data[key] = []
-#             file.close()
-#             with open(esolation + e, 'w') as file:
-#                 json.dump(data, file)
-#             file.close()
-#         for g in gpus:
-#             with open(gpu + g, 'r') as file:
-#                 data = json.load(file)
-#             if 'pool' in g or 'latency' in g:
-#                 for item in data['lines']:
-#                     for key in item:
-#                         item[key] = ""
-#             else:
-#                 for key in data:
-#                     data[key] = []
-#             file.close()
-#             with open(gpu + g, 'w') as file:
-#                 json.dump(data, file)
-#             file.close()
-#     except Exception as e:
-#         print(e)
-#         return jsonify({
-#             "code": 2,
-#             "msg": e
-#         })
-#     return jsonify({
-#         "code": 1,
-#         "msg": "清理缓存成功"
-#     })
+@app.route('/clear_cache', methods=['GET'])
+def clear_cache():
+    vkernel = './static/api/vkernel/'
+    gpu = './static/api/gpu/'
+
+    vkernels = os.listdir(vkernel)
+    gpus = os.listdir(gpu)
+    try:
+        for e in vkernels:
+            with open(vkernel + e, 'r') as file:
+                data = json.load(file)
+            data["data"] = [0, 0, 0, 0, 0, 0]
+            with open(vkernel + e, 'w') as file:
+                json.dump(data, file)
+
+        for g in gpus:
+            if g in ['imageProcess.json', 'objectSegementation.json', 'traffic.json']:
+                with open(gpu + g, 'r') as file:
+                    data = json.load(file)
+                data["data"] = [0, 0, 0, 0]
+                with open(gpu + g, 'w') as file:
+                    json.dump(data, file)
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "code": 2,
+            "msg": e
+        })
+    return jsonify({
+        "code": 1,
+        "msg": "清理缓存成功"
+    })
 
 
 @app.cli.command()

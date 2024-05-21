@@ -72,6 +72,7 @@ layui.use(['jquery', 'echarts'], function(){
                 headers: {'Content-Type': 'application/json'},
             }
             const response = await fetch(`http://222.20.94.68:16000/`+str, options)
+<!--            fetch(`http://222.20.94.68:16000/`+str, options)-->
             return await response.json()
       }
 

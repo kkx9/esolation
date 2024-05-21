@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FUTEX</title>
+    <link rel="stylesheet" href="/static/css/layui.css">
+</head>
+<body>
+<div class="layuimini-container">
+<div class="layuimini-main">
+    <h1 style="text-align: center;">ImageProcess</h1>
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="apiChart" style="min-height:500px;padding: 30px"></div>
+
+<!--        <div style="padding: 30px">-->
+<!--            <button class="layui-btn" id="API">Start</button>-->
+<!--        </div>-->
+    </div>
+
+    <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
+        <div id="tvmChart" style="min-height:500px;padding: 30px"></div>
+
+<!--        <div style="padding: 30px">-->
+<!--            <button class="layui-btn" id="TVM">Start</button>-->
+<!--        </div>-->
+    </div>
+</div>
+</div>
+<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'echarts'], function () {
+        var $ = layui.jquery,
+            layer = layui.layer,
+            echarts = layui.echarts;
+
+        /**
+         * 柱状图
+         */
+        var apiChart = echarts.init(document.getElementById('apiChart'), 'walden');
+
+        var optionAPI = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: '吞吐量测试',
+                left: 'center'
+            },
+            tooltip: {},
+            xAxis: {
+                data: ["Normal", "StreamBox"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: 'Throughput (req/s)',
+<!--                nameLocation: 'middle',-->
+<!--                nameGap: 30,-->
+<!--                nameTextStyle: {-->
+<!--                    color: 'black',-->
+<!--                    fontFamily: '黑体',-->
+<!--                    fontSize: 16-->
+<!--                },-->
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    type: 'bar',
+                    barWidth: '50%',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside' // 数值显示在柱状图的顶部
+                    },
+                    data: [0, 0]
+                }
+            ]
+        };
+
+        // 读取JSON文件
+        function loadAPIJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/gpu/imageProcess.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawAPIChart(data) {
+            var jsonData = JSON.parse(data);
+            optionAPI.series[0].data[0] = jsonData["data"][1];
+            optionAPI.series[0].data[1] = jsonData["data"][3];
+            apiChart.setOption(optionAPI);
+        }
+
+        // 定时更新统计图
+        function updateAPIChart() {
+            loadAPIJSON(function(response) {
+              drawAPIChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateAPIChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateAPIChart, 1000);
+
+        var tvmChart = echarts.init(document.getElementById('tvmChart'), 'walden');
+
+        var optionTVM = {
+            backgroundColor: {
+                type: 'linear',
+                x: 0, // 渐变起始点 x 坐标
+                y: 0, // 渐变起始点 y 坐标
+                x2: 1, // 渐变结束点 x 坐标
+                y2: 1, // 渐变结束点 y 坐标
+                colorStops: [{ // 渐变颜色的起始颜色
+                    offset: 0, color: '#FFFFFF' // 渐变起始颜色为红色
+                }, {
+                    offset: 1, color: '#F0F0FF' // 渐变结束颜色为蓝色
+                }],
+                globalCoord: false // 是否使用全局坐标系
+            },
+            title: {
+                text: '平均存储占用测试',
+                left: 'center'
+            },
+<!--            legend: {-->
+<!--                orient: 'horizontal', // 设置图例水平显示-->
+<!--                x: 'center', // 设置图例水平居中-->
+<!--                y: 'bottom', // 设置图例在底部显示-->
+<!--                data:['Total time']-->
+<!--            },-->
+            tooltip: {},
+            xAxis: {
+                data: ["Normal", "StreamBox"],
+                axisLabel: {
+                    interval: 0,  // 强制显示所有x轴标签
+                    rotate: 0    // 旋转45度，防止标签重叠
+                },
+                splitLine: {      // 不显示网格线
+                    show: false
+                }
+            },
+            yAxis: {
+                name: "Memory（MB）",
+<!--                nameLocation: 'middle',-->
+<!--                nameGap: 30,-->
+<!--                nameTextStyle: {-->
+<!--                    color: 'black',-->
+<!--                    fontFamily: '黑体',-->
+<!--                    fontSize: 16-->
+<!--                },-->
+                axisLine: {       // 不显示y轴线条
+                    show: false
+                }
+            },
+            series: [
+                {
+                    name: 'Memory',
+                    type: 'bar',
+                    barWidth: '50%',
+                    label: {
+                        show: true, // 显示数值
+                        position: 'inside',
+<!--                        formatter: function(params) {-->
+<!--                            return params.value.toFixed(3)-->
+<!--                        }-->
+                    },
+                    data: [0, 0]
+                },
+            ]
+        };
+
+        // 读取JSON文件
+        function loadTVMJSON(callback) {
+            var xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', '/static/api/gpu/imageProcess.json', true);
+            xobj.onreadystatechange = function () {
+              if (xobj.readyState == 4 && xobj.status == "200") {
+                callback(xobj.responseText);
+              }
+            };
+            xobj.send(null);
+        }
+
+        function drawTVMChart(data) {
+            var jsonData = JSON.parse(data);
+            optionTVM.series[0].data[0] = jsonData["data"][0];
+            optionTVM.series[0].data[1] = jsonData["data"][2];
+            tvmChart.setOption(optionTVM);
+        }
+
+        // 定时更新统计图
+        function updateTVMChart() {
+            loadTVMJSON(function(response) {
+              drawTVMChart(response);
+            });
+        }
+
+         // 初始化绘制统计图
+        updateTVMChart();
+
+        // 每隔一段时间更新统计图
+        setInterval(updateTVMChart, 1000);
+
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
+
+    });
+</script>
+</body>
+</html>
