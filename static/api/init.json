@@ -1,6 +1,6 @@
 {
   "homeInfo": {
-    "title": "首页",
+    "title": "main page",
     "href": "/static/page/welcome.html"
   },
   "logoInfo": {
@@ -10,7 +10,7 @@
   },
   "menuInfo": [
     {
-        "title": "主页",
+        "title": "main page",
         "href": "/static/page/welcome.html",
         "icon": "fa fa-home",
         "target": "_self"
