@@ -30,6 +30,11 @@
 <!--    </div>-->
 </div>
 </div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <button class="layui-btn" id="getDataButton">Get Data</button>
+</div>
+
 <script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 <script>
@@ -40,6 +45,18 @@
 
         $('button').on('click', function(){
             exec_button_api(this.id);
+        });
+
+        document.getElementById("getDataButton").addEventListener("click", function() {
+            fetch('http://830401fhkm99.vicp.fun:37204/terasort')
+            .then(response => response.json())
+            .then(data => {
+                // console.log(data);
+                layer.msg('Success, waiting for data', {
+                    time: 1000,
+                });
+            })
+            .catch(error => {});
         });
 
         // 新增提交的方法

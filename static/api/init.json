@@ -54,6 +54,24 @@
       "target": "_self",
       "child": [
         {
+          "title": "chatBot",
+          "href": "/static/page/chatbot.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "WordCount",
+          "href": "/static/page/wordcount.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
+          "title": "Video-ana",
+          "href": "/static/page/video-ana.html",
+          "icon": "fa fa-bar-chart",
+          "target": "_self"
+        },
+        {
           "title": "ImageProcess",
           "href": "/static/page/image.html",
           "icon": "fa fa-bar-chart",

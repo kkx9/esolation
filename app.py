@@ -42,14 +42,16 @@ def vkernel_data():
 def gpu_data():
     data = request.get_json()
     print(data)
-    mode, application = data["mode"], data["application"]
+    application = data["appname"]
     filename = 'static/api/gpu/' + application + '.json'
     with open(filename, 'r') as f:
         old_data = json.load(f)
-    if mode == 'normal':
-        old_data['data'][0], old_data['data'][1] = data['avememory'], data['throughput']
-    else:
-        old_data['data'][2], old_data['data'][3] = data['avememory'], data['throughput']
+        if 'st_total_time' in data:
+            old_data['data'][0], old_data['data'][1] = data['st_throughput'], data['st_total_time']
+        if 'as_total_time' in data:
+            old_data['data'][2], old_data['data'][3] = data['as_throughput'], data['as_total_time']
+        if 'if_total_time' in data:
+            old_data['data'][4], old_data['data'][5] = data['if_throughput'], data['if_total_time']
 
     with open(filename, 'w') as f:
         json.dump(old_data, f, ensure_ascii=False, indent=4)
@@ -80,10 +82,10 @@ def clear_cache():
                 json.dump(data, file)
 
         for g in gpus:
-            if g in ['imageProcess.json', 'objectSegementation.json', 'traffic.json']:
+            if g in ['imageprocess.json', 'objectsegementation.json', 'traffic.json', 'chatbot.json', 'wordcount.json', 'video-ana.json']:
                 with open(gpu + g, 'r') as file:
                     data = json.load(file)
-                data["data"] = [0, 0, 0, 0]
+                data["data"] = [0, 0, 0, 0, 0, 0]
                 with open(gpu + g, 'w') as file:
                     json.dump(data, file)
     except Exception as e:

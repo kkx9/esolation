@@ -11,21 +11,19 @@
     <h1 style="text-align: center;">ImageProcess</h1>
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="apiChart" style="min-height:500px;padding: 30px"></div>
-
-<!--        <div style="padding: 30px">-->
-<!--            <button class="layui-btn" id="API">Start</button>-->
-<!--        </div>-->
     </div>
 
     <div class="layui-col-xs12 layui-col-md6" style="text-align: center;">
         <div id="tvmChart" style="min-height:500px;padding: 30px"></div>
-
-<!--        <div style="padding: 30px">-->
-<!--            <button class="layui-btn" id="TVM">Start</button>-->
-<!--        </div>-->
     </div>
 </div>
 </div>
+
+<!-- 新增的按钮 -->
+<div style="text-align: center; margin-top: 20px;">
+    <button class="layui-btn" id="customButton">Get Data</button>
+</div>
+
 <script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 <script>
@@ -33,6 +31,36 @@
         var $ = layui.jquery,
             layer = layui.layer,
             echarts = layui.echarts;
+
+        $('button').on('click', function(){
+            exec_button_api(this.id);
+        });
+
+        // 新增提交的方法
+        const exec_button_api = async (id) => {
+            const options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+            }
+            const response = await fetch(`/api/button/${id}`, options)
+            return await response.json()
+        }
+
+        window.exec_button = function(id) {
+            exec_button_api(id).then(function (ret) {
+                if (!ret.code) {
+                    layer.msg(ret.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(ret.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+        }
 
         /**
          * 柱状图
@@ -54,12 +82,12 @@
                 globalCoord: false // 是否使用全局坐标系
             },
             title: {
-                text: '吞吐量测试',
+                text: 'Throughput',
                 left: 'center'
             },
             tooltip: {},
             xAxis: {
-                data: ["Normal", "StreamBox"],
+                data: ["StreamBox", "Astraea", "INFless"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
@@ -70,13 +98,6 @@
             },
             yAxis: {
                 name: 'Throughput (req/s)',
-<!--                nameLocation: 'middle',-->
-<!--                nameGap: 30,-->
-<!--                nameTextStyle: {-->
-<!--                    color: 'black',-->
-<!--                    fontFamily: '黑体',-->
-<!--                    fontSize: 16-->
-<!--                },-->
                 axisLine: {       // 不显示y轴线条
                     show: false
                 }
@@ -84,12 +105,12 @@
             series: [
                 {
                     type: 'bar',
-                    barWidth: '50%',
+                    barWidth: '70%',
                     label: {
                         show: true, // 显示数值
                         position: 'inside' // 数值显示在柱状图的顶部
                     },
-                    data: [0, 0]
+                    data: [0, 0, 0]
                 }
             ]
         };
@@ -98,7 +119,7 @@
         function loadAPIJSON(callback) {
             var xobj = new XMLHttpRequest();
             xobj.overrideMimeType("application/json");
-            xobj.open('GET', '/static/api/gpu/imageProcess.json', true);
+            xobj.open('GET', '/static/api/gpu/imageprocess.json', true);
             xobj.onreadystatechange = function () {
               if (xobj.readyState == 4 && xobj.status == "200") {
                 callback(xobj.responseText);
@@ -109,8 +130,9 @@
 
         function drawAPIChart(data) {
             var jsonData = JSON.parse(data);
-            optionAPI.series[0].data[0] = jsonData["data"][1];
-            optionAPI.series[0].data[1] = jsonData["data"][3];
+            optionAPI.series[0].data[0] = jsonData["data"][0];
+            optionAPI.series[0].data[1] = jsonData["data"][2];
+            optionAPI.series[0].data[2] = jsonData["data"][4];
             apiChart.setOption(optionAPI);
         }
 
@@ -144,18 +166,12 @@
                 globalCoord: false // 是否使用全局坐标系
             },
             title: {
-                text: '平均存储占用测试',
+                text: 'p99 Latency',
                 left: 'center'
             },
-<!--            legend: {-->
-<!--                orient: 'horizontal', // 设置图例水平显示-->
-<!--                x: 'center', // 设置图例水平居中-->
-<!--                y: 'bottom', // 设置图例在底部显示-->
-<!--                data:['Total time']-->
-<!--            },-->
             tooltip: {},
             xAxis: {
-                data: ["Normal", "StreamBox"],
+                data: ["StreamBox", "Astraea", "INFless"],
                 axisLabel: {
                     interval: 0,  // 强制显示所有x轴标签
                     rotate: 0    // 旋转45度，防止标签重叠
@@ -165,31 +181,21 @@
                 }
             },
             yAxis: {
-                name: "Memory（MB）",
-<!--                nameLocation: 'middle',-->
-<!--                nameGap: 30,-->
-<!--                nameTextStyle: {-->
-<!--                    color: 'black',-->
-<!--                    fontFamily: '黑体',-->
-<!--                    fontSize: 16-->
-<!--                },-->
+                name: "p99 Latency（s）",
                 axisLine: {       // 不显示y轴线条
                     show: false
                 }
             },
             series: [
                 {
-                    name: 'Memory',
+                    name: 'p99 Latency',
                     type: 'bar',
-                    barWidth: '50%',
+                    barWidth: '70%',
                     label: {
                         show: true, // 显示数值
                         position: 'inside',
-<!--                        formatter: function(params) {-->
-<!--                            return params.value.toFixed(3)-->
-<!--                        }-->
                     },
-                    data: [0, 0]
+                    data: [0, 0, 0]
                 },
             ]
         };
@@ -198,7 +204,7 @@
         function loadTVMJSON(callback) {
             var xobj = new XMLHttpRequest();
             xobj.overrideMimeType("application/json");
-            xobj.open('GET', '/static/api/gpu/imageProcess.json', true);
+            xobj.open('GET', '/static/api/gpu/imageprocess.json', true);
             xobj.onreadystatechange = function () {
               if (xobj.readyState == 4 && xobj.status == "200") {
                 callback(xobj.responseText);
@@ -206,11 +212,12 @@
             };
             xobj.send(null);
         }
-
+        var runtime = ["StreamBox", "Astraea", "INFless"];
         function drawTVMChart(data) {
             var jsonData = JSON.parse(data);
-            optionTVM.series[0].data[0] = jsonData["data"][0];
-            optionTVM.series[0].data[1] = jsonData["data"][2];
+            optionTVM.series[0].data[0] = jsonData["data"][1];
+            optionTVM.series[0].data[1] = jsonData["data"][3];
+            optionTVM.series[0].data[2] = jsonData["data"][5];
             tvmChart.setOption(optionTVM);
         }
 
@@ -233,6 +240,35 @@
             echartsRecords.resize();
         }
 
+        // 新增的按钮点击事件
+        $('#customButton').on('click', function() {
+            var url = 'http://87790ev812.vicp.fun:37090/'; // 请替换为实际的URL
+            var application = 'imageprocess'; // 请替换为实际的参数值
+
+            // 发送GET请求
+            fetch(url + '?application=' + application, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 0) {
+                    layer.msg(data.msg, {
+                        icon: 1,
+                        time: 1000,
+                    });
+                } else {
+                    layer.msg(data.msg, {
+                        icon: 2,
+                        time: 1000,
+                    });
+                }
+            })
+            .catch(error => {
+                layer.msg('Success, waiting for data', {
+                    time: 1000,
+                });
+            });
+        });
     });
 </script>
 </body>
